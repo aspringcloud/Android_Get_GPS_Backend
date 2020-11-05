@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+{% block contents %}
+
+  {% comment %} <h1>{{ request.resolver_match.url_name }}</h1> {% endcomment %}
+  {% if request.resolver_match.url_name == 'signup' %}
+    <h1>회원가입</h1>
+  {% else %}
+    <h1>로그인</h1>
+  {% endif %}
+  
+  <form action="" method="POST" enctype="multipart/form-data">
+    {% csrf_token %}
+    {{ form }}
+    <button class="btn btn-primary">저장</button>
+  </form>
+  {% if request.resolver_match.url_name == 'login' %}
+      <a href="{% url 'accounts:signup'%}">
+        Sign up
+      </a>
+  {% endif %}
+{% endblock  %}
