@@ -216,3 +216,4 @@ YMLdir/
 
 # End of https://www.toptal.com/developers/gitignore/api/django,python
 .DS_Store
+azure_vm.azcli
