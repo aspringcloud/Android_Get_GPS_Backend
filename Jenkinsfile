@@ -12,9 +12,9 @@ pipeline{
     stages{
         stage('build $LOCALIMAGE:$LOCALIMAGETAG images'){
             steps{
-                sh "docker tag $LOCALIMAGE:$LOCALIMAGETAG $LOCALIMAGE:delete"
-                sh "docker rmi $LOCALIMAGE:$LOCALIMAGETAG"
-                sh 'docker build -t $LOCALIMAGE:$LOCALIMAGETAG .'
+                sh "sudo docker tag $LOCALIMAGE:$LOCALIMAGETAG $LOCALIMAGE:delete"
+                sh "sudo docker rmi $LOCALIMAGE:$LOCALIMAGETAG"
+                sh 'sudo docker build -t $LOCALIMAGE:$LOCALIMAGETAG .'
                 sh 'echo $SERVERSSH'
             }
         }
@@ -23,9 +23,9 @@ pipeline{
                 script{
                     // 작성해둔 젠킨스 크리덴셜 ID를 넣는다
                     withCredentials([usernamePassword( credentialsId: 'cwleeazurecr', usernameVariable: 'USER', passwordVariable: 'PASSWORD')]){
-                        sh "docker login -u $USER -p $PASSWORD $AZURECR"
-                        sh "docker tag $LOCALIMAGE:$LOCALIMAGETAG $AZURECR/$LOCALIMAGE:$LOCALIMAGETAG"
-                        sh "docker push $AZURECR/$LOCALIMAGE:$LOCALIMAGETAG"
+                        sh "sudo docker login -u $USER -p $PASSWORD $AZURECR"
+                        sh "sudo docker tag $LOCALIMAGE:$LOCALIMAGETAG $AZURECR/$LOCALIMAGE:$LOCALIMAGETAG"
+                        sh "sudo docker push $AZURECR/$LOCALIMAGE:$LOCALIMAGETAG"
                     }
                 }
             }
