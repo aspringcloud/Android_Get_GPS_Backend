@@ -14,6 +14,7 @@ pipeline{
             steps{
                 sh "echo any body there!????"
                 sh "echo $AZURECR/$LOCALIMAGE:$LOCALIMAGETAG"
+                sh "sudo echo $AZURECR/$LOCALIMAGE:$LOCALIMAGETAG"
             }
         }
     }
