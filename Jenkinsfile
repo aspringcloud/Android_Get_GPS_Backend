@@ -10,7 +10,7 @@ pipeline{
     }
     agent any
     stages{
-        stage{
+        stage('build $LOCALIMAGE:$LOCALIMAGETAG images')ß{
             steps{
                 sh "echo any body there!????"
                 sh "echo $AZURECR/$LOCALIMAGE:$LOCALIMAGETAG"
