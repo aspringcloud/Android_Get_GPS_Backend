@@ -28,9 +28,9 @@ pipeline{
                     withCredentials([usernamePassword( credentialsId: 'DeployServerUser', usernameVariable: 'USER', passwordVariable: 'PASSWORD')]){
                         sh 'sshpass -p $PASSWORD ssh -o StrictHostKeyChecking=no $USER@$DEPLOYIP'
                         script{
-                            withCredentials([usernamePassword( credentialsId: 'cwleeazurecr', usernameVariable: 'USER', passwordVariable: 'PASSWORD')]) {
+                            withCredentials([usernamePassword( credentialsId: 'cwleeazurecr', usernameVariable: 'CRUSER', passwordVariable: 'CRPASSWORD')]) {
                                 // sh 'ssh $SERVERUSER@$SERVERIP "sudo docker login -u $USER -p $PASSWORD $AZURECR"'
-                                sh 'sshpass -p $PASSWORD ssh $USER@$DEPLOYIP "sudo docker login -u $USER -p $PASSWORD $AZURECR"'
+                                sh 'sshpass -p $PASSWORD ssh $USER@$DEPLOYIP "sudo docker login -u $CRUSER -p $CRPASSWORD $AZURECR"'
                             }
                         }
                         sh 'sshpass -p $PASSWORD ssh $USER@$DEPLOYIP "sudo docker pull $AZURECR/$LOCALIMAGE:$LOCALIMAGETAG"'
