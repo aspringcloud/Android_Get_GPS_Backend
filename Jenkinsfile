@@ -34,9 +34,7 @@ pipeline{
                             }
                         }
                         sh 'sudo docker pull $AZURECR/$LOCALIMAGE:$LOCALIMAGETAG'
-                        sh 'sudo docker stop test'
                         sh 'sudo docker run -p 8000:8000 -d --name test --rm $AZURECR/$LOCALIMAGE:$LOCALIMAGETAG'
-                        
                     }
                 }
             }
