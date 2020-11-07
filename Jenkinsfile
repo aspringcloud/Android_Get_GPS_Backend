@@ -30,11 +30,11 @@ pipeline{
                         script{
                             withCredentials([usernamePassword( credentialsId: 'cwleeazurecr', usernameVariable: 'USER', passwordVariable: 'PASSWORD')]) {
                                 // sh 'ssh $SERVERUSER@$SERVERIP "sudo docker login -u $USER -p $PASSWORD $AZURECR"'
-                                sh 'sudo docker login -u $USER -p $PASSWORD $AZURECR'
+                                sh 'sshpass -p $PASSWORD ssh $USER@$DEPLOYIP "sudo docker login -u $USER -p $PASSWORD $AZURECR"'
                             }
                         }
-                        sh 'sudo docker pull $AZURECR/$LOCALIMAGE:$LOCALIMAGETAG'
-                        sh 'sudo docker run -p 8000:8000 -d --name test --rm $AZURECR/$LOCALIMAGE:$LOCALIMAGETAG'
+                        sh 'sshpass -p $PASSWORD ssh $USER@$DEPLOYIP "sudo docker pull $AZURECR/$LOCALIMAGE:$LOCALIMAGETAG"'
+                        sh 'sshpass -p $PASSWORD ssh $USER@$DEPLOYIP "sudo docker run -p 8000:8000 -d --name test --rm $AZURECR/$LOCALIMAGE:$LOCALIMAGETAG"'
                     }
                 }
             }
