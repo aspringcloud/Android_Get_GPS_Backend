@@ -3,6 +3,7 @@ from .models import User
 from django.conf import settings
 import os
 import time
+import yaml
 
 
 # This is necessary for testing with non-HTTPS localhost
@@ -15,7 +16,9 @@ os.environ['OAUTHLIB_RELAX_TOKEN_SCOPE'] = '1'
 os.environ['OAUTHLIB_IGNORE_SCOPE_CHANGE'] = '1'
 
 # Load the oauth_sign_info.yml file
-sign_info = settings.accounts_settings
+
+accounts_stream = open('YMLdir/oauth_settings.yml', 'r')
+sign_info = yaml.load(accounts_stream, yaml.SafeLoader)
 authorize_url = '{0}{1}'.format(
     sign_info['authority'], sign_info['authorize_endpoint'])
 token_url = '{0}{1}'.format(sign_info['authority'], sign_info['token_endpoint'])

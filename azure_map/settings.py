@@ -21,10 +21,6 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 stream = open('YMLdir/settings_data.yml', 'r')
 settings = yaml.load(stream, yaml.SafeLoader)
 
-accounts_stream = open('YMLdir/oauth_settings.yml', 'r')
-accounts_settings = yaml.load(stream, yaml.SafeLoader)
-
-
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/3.1/howto/deployment/checklist/
 
