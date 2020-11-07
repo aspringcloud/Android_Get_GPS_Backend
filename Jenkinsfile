@@ -33,9 +33,9 @@ pipeline{
                                 sh 'sudo docker login -u $USER -p $PASSWORD $AZURECR'
                             }
                         }
-                        sh 'ssh $SERVERUSER@$SERVERIP "sudo docker pull $AZURECR/$LOCALIMAGE:$LOCALIMAGETAG"'
-                        sh 'ssh $SERVERUSER@$SERVERIP "sudo docker stop test"'
-                        sh 'ssh $SERVERUSER@$SERVERIP "sudo docker run -p 8000:8000 -d --name test --rm $AZURECR/$LOCALIMAGE:$LOCALIMAGETAG"'
+                        sh 'sudo docker pull $AZURECR/$LOCALIMAGE:$LOCALIMAGETAG'
+                        sh 'sudo docker stop test'
+                        sh 'sudo docker run -p 8000:8000 -d --name test --rm $AZURECR/$LOCALIMAGE:$LOCALIMAGETAG'
                         
                     }
                 }
