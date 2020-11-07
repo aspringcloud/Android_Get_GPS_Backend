@@ -7,7 +7,7 @@ pipeline{
         SERVERSSH = '$SERVERUSER@$SERVERIP'
         LOCALIMAGE = 'azuremap'
         LOCALIMAGETAG = 'latest'
-        AZURECR = '$AZURECR'
+        AZURECR = 'cwleecr.azurecr.io'
     }
     agent any
     stages{
