@@ -3,8 +3,6 @@ pipeline{
         SERVERIP = '52.231.51.213'
         SERVERUSER = 'azureuser'
         DEPLOYIP = '52.231.51.213'
-        // SERVERSSH = 'azureuser@52.231.51.213'
-        SERVERSSH = '$SERVERUSER@$SERVERIP'
         LOCALIMAGE = 'azuremap'
         LOCALIMAGETAG = 'latest'
         AZURECR = 'cwleecr.azurecr.io'
@@ -31,13 +29,13 @@ pipeline{
                         sh 'sshpass -p $PASSWORD ssh -o StrictHostKeyChecking=no $USER@$DEPLOYIP'
                         script{
                             withCredentials([usernamePassword( credentialsId: 'cwleeazurecr', usernameVariable: 'USER', passwordVariable: 'PASSWORD')]) {
-                                // sh 'ssh $SERVERSSH "sudo docker login -u $USER -p $PASSWORD $AZURECR"'
+                                // sh 'ssh $SERVERUSER@$SERVERIP "sudo docker login -u $USER -p $PASSWORD $AZURECR"'
                                 sh 'sudo docker login -u $USER -p $PASSWORD $AZURECR'
                             }
                         }
-                        sh 'ssh $SERVERSSH "sudo docker pull $AZURECR/$LOCALIMAGE:$LOCALIMAGETAG"'
-                        sh 'ssh $SERVERSSH "sudo docker stop test"'
-                        sh 'ssh $SERVERSSH "sudo docker run -p 8000:8000 -d --name test --rm $AZURECR/$LOCALIMAGE:$LOCALIMAGETAG"'
+                        sh 'ssh $SERVERUSER@$SERVERIP "sudo docker pull $AZURECR/$LOCALIMAGE:$LOCALIMAGETAG"'
+                        sh 'ssh $SERVERUSER@$SERVERIP "sudo docker stop test"'
+                        sh 'ssh $SERVERUSER@$SERVERIP "sudo docker run -p 8000:8000 -d --name test --rm $AZURECR/$LOCALIMAGE:$LOCALIMAGETAG"'
                         
                     }
                 }
