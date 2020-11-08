@@ -10,6 +10,11 @@ pipeline{
     agent any
     stages{
         stage('docker push to azurecr'){
+            stage('build $LOCALIMAGE:$LOCALIMAGETAG images'){
+                steps{
+                    sh 'sudo docker build -t $LOCALIMAGE:$LOCALIMAGETAG .'
+                }
+            }
             steps {
                 script{
                     // 작성해둔 젠킨스 크리덴셜 ID를 넣는다
