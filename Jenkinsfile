@@ -28,7 +28,7 @@ pipeline{
         }
         stage('Remove prune docker images'){
             steps{
-                sh 'docker image prune'
+                sh 'docker rmi $(sudo docker images -f dangling=true -q)'
             }
         }
         stage('ssh deploy') {
@@ -50,18 +50,9 @@ pipeline{
                         }
                         // sh 'sshpass -p $PASSWORD ssh $USER@$DEPLOYIP "sudo docker run -p 8000:8000 -d -it -v /home/azureuser/Documents/YMLdir:/code/YMLdir --name test $AZURECR/$LOCALIMAGE:$LOCALIMAGETAG"'
                         sh 'sshpass -p $PASSWORD ssh $USER@$DEPLOYIP "sudo docker-compose up -d"'
-                        sh 'sshpass -p $PASSWORD ssh $USER@$DEPLOYIP "sudo docker rmi $(sudo docker images $AZURECR/$LOCALIMAGE -f dangling=true -q)"'
-                        sh 'sshpass -p $PASSWORD ssh $USER@$DEPLOYIP "sudo docker image prune"'
-                    }
-                }
-            }
-        }
-        stage('test') {
-            steps{
-                script{
-                    withCredentials([usernamePassword( credentialsId: 'DeployServerUser', usernameVariable: 'USER', passwordVariable: 'PASSWORD')]){
-                        sh 'sshpass -p $PASSWORD ssh -o StrictHostKeyChecking=no $USER@$DEPLOYIP'
-                        sh 'docker ps -a > dock.txt'
+                        // sh 'sshpass -p $PASSWORD ssh $USER@$DEPLOYIP "sudo docker rmi $(sudo docker images $AZURECR/$LOCALIMAGE -f dangling=true -q)"'
+                        sh 'sshpass -p $PASSWORD ssh $USER@$DEPLOYIP "sudo docker rmi $(sudo docker images -f dangling=true -q)"'
+                        sh 'mkdir anybody_there'
                     }
                 }
             }
