@@ -26,18 +26,17 @@ pipeline{
                 }
             }
         }
-        stage('Remove prune docker images'){
-            steps{
-                sh 'docker rmi $(sudo docker images -f dangling=true -q)'
-            }
-        }
+        // stage('Remove prune docker images'){
+        //     steps{
+        //         sh 'docker rmi $(sudo docker images -f dangling=true -q)'
+        //     }
+        // }
         stage('ssh deploy') {
             steps{
                 script{
                     // 작성해둔 젠킨스 크리덴셜 ID를 넣는다
                     withCredentials([usernamePassword( credentialsId: 'DeployServerUser', usernameVariable: 'USER', passwordVariable: 'PASSWORD')]){
                         sh 'sshpass -p $PASSWORD ssh -o StrictHostKeyChecking=no $USER@$DEPLOYIP'
-                        docker container prune --filter 'NAME=cwleecr.azurecr.io/azuremap'
                         script{
                             withCredentials([usernamePassword( credentialsId: 'cwleeazurecr', usernameVariable: 'CRUSER', passwordVariable: 'CRPASSWORD')]) {
                                 // sh 'ssh $SERVERUSER@$SERVERIP "sudo docker login -u $USER -p $PASSWORD $AZURECR"'
