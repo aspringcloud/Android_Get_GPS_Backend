@@ -26,6 +26,11 @@ pipeline{
                 }
             }
         }
+        stage('Remove prune docker images'){
+            steps{
+                sh 'docker image prune'
+            }
+        }
         stage('ssh deploy') {
             steps{
                 script{
