@@ -45,7 +45,8 @@ pipeline{
                         }
                         sh 'sshpass -p $PASSWORD ssh $USER@$DEPLOYIP "sudo docker pull $AZURECR/$LOCALIMAGE:$LOCALIMAGETAG"'
                         // sh 'sshpass -p $PASSWORD ssh $USER@$DEPLOYIP "sudo docker run -p 8000:8000 -d -it -v /home/azureuser/Documents/YMLdir:/code/YMLdir --name test $AZURECR/$LOCALIMAGE:$LOCALIMAGETAG"'
-                        sh 'sshpass -p $PASSWORD ssh $USER@$DEPLOYIP "sudo docker-compose up"'
+                        sh 'sshpass -p $PASSWORD ssh $USER@$DEPLOYIP "sudo docker-compose up -d"'
+                        sh 'sshpass -p $PASSWORD ssh $USER@$DEPLOYIP "sudo docker rmi $(sudo docker images $AZURECR/$LOCALIMAGE -f dangling=true)"'
                         // withCredentials([string(credentialsId: 'mygittoken', variable: 'SECRET')]) { //set SECRET with the credential content
                         //     sh 'sshpass -p $PASSWORD ssh $USER@$DEPLOYIP "git clone https://alphanewbie:${SECRET}@github.com/Alphanewbie/azuremap.git"'
                         // }

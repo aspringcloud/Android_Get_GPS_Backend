@@ -1,0 +1,8 @@
+version : '3'
+services:
+    test :
+        image: cwleecr.azurecr.io/azuremap:latest
+        ports:
+            - "8000:8000"
+        volumes:
+            - ~/Documents/YMLdir:/code/YMLdir
