@@ -44,12 +44,22 @@ pipeline{
                             }
                         }
                         sh 'sshpass -p $PASSWORD ssh $USER@$DEPLOYIP "sudo docker pull $AZURECR/$LOCALIMAGE:$LOCALIMAGETAG"'
+                        withCredentials([string(credentialsId: 'repo_token', variable: 'SECRET')]) { //set SECRET with the credential content
+                            sh 'sshpass -p $PASSWORD ssh $USER@$DEPLOYIP "curl https://raw.githubusercontent.com/Alphanewbie/azuremap/master/docker-compose.yml?token=${SECRET} > docker-compose.yml"'
+                        }
                         // sh 'sshpass -p $PASSWORD ssh $USER@$DEPLOYIP "sudo docker run -p 8000:8000 -d -it -v /home/azureuser/Documents/YMLdir:/code/YMLdir --name test $AZURECR/$LOCALIMAGE:$LOCALIMAGETAG"'
                         sh 'sshpass -p $PASSWORD ssh $USER@$DEPLOYIP "sudo docker-compose up -d"'
-                        sh 'sshpass -p $PASSWORD ssh $USER@$DEPLOYIP "sudo docker rmi $(sudo docker images $AZURECR/$LOCALIMAGE -f dangling=true)"'
-                        // withCredentials([string(credentialsId: 'mygittoken', variable: 'SECRET')]) { //set SECRET with the credential content
-                        //     sh 'sshpass -p $PASSWORD ssh $USER@$DEPLOYIP "git clone https://alphanewbie:${SECRET}@github.com/Alphanewbie/azuremap.git"'
-                        // }
+                        sh 'sshpass -p $PASSWORD ssh $USER@$DEPLOYIP "sudo docker rmi $(sudo docker images $AZURECR/$LOCALIMAGE -f dangling=true -q)"'
+                    }
+                }
+            }
+        }
+        stage('test') {
+            steps{
+                script{
+                    withCredentials([usernamePassword( credentialsId: 'DeployServerUser', usernameVariable: 'USER', passwordVariable: 'PASSWORD')]){
+                        sh 'sshpass -p $PASSWORD ssh -o StrictHostKeyChecking=no $USER@$DEPLOYIP'
+                        sh 'docker ps -a > dock.txt'
                     }
                 }
             }
