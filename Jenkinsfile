@@ -51,8 +51,8 @@ pipeline{
                         sh 'sshpass -p $PASSWORD ssh $USER@$DEPLOYIP "sudo docker-compose up -d"'
                         // sh 'sshpass -p $PASSWORD ssh $USER@$DEPLOYIP "sudo docker rmi $(sudo docker images $AZURECR/$LOCALIMAGE -f dangling=true -q)"'
                         // sh 'sshpass -p $PASSWORD ssh $USER@$DEPLOYIP "sudo docker rmi $(sudo docker images -f dangling=true -q)"'
-                        sh 'sshpass -p $PASSWORD ssh $USER@$DEPLOYIP "sudo docker system prune"'
-                        sh 'mkdir anybody_there'
+                        // sh 'sshpass -p $PASSWORD ssh $USER@$DEPLOYIP "sudo docker images -f "dangling=true" -q | xargs sudo docker rmi -f"'
+                        sh 'sshpass -p $PASSWORD ssh $USER@$DEPLOYIP "sudo docker images -f "dangling=true" -q | xargs sudo docker rmi"'
                     }
                 }
             }
