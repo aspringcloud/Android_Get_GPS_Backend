@@ -51,7 +51,7 @@ pipeline{
                         sh 'sshpass -p $PASSWORD ssh $USER@$DEPLOYIP "sudo docker-compose up -d"'
                         // sh 'sshpass -p $PASSWORD ssh $USER@$DEPLOYIP "sudo docker rmi $(sudo docker images $AZURECR/$LOCALIMAGE -f dangling=true -q)"'
                         // sh 'sshpass -p $PASSWORD ssh $USER@$DEPLOYIP "sudo docker rmi $(sudo docker images -f dangling=true -q)"'
-                        images=$(docker images -f dangling=true -q); if [[ ${images} ]]; then docker rmi --force ${images}; fi
+                        sh 'sshpass -p $PASSWORD ssh $USER@$DEPLOYIP "images=$(sudo docker images -f dangling=true -q); if [[ ${images} ]]; then sudo docker rmi --force ${images}; fi"'
                         sh 'mkdir anybody_there'
                     }
                 }
