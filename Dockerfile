@@ -6,7 +6,8 @@ RUN apt-get update \
     && apt-get install -y --no-install-recommends
 RUN mkdir /code
 WORKDIR /code 
-ADD . /code/ 
+ADD . /code/
+RUN mkdir /code/Log
 RUN pip install --upgrade pip \
     && pip install -r requirements.txt 
 
