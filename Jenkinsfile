@@ -45,6 +45,12 @@ pipeline{
                         }
                         sh 'sshpass -p $PASSWORD ssh $USER@$DEPLOYIP "sudo docker pull $AZURECR/$LOCALIMAGE:$LOCALIMAGETAG"'
                         sh 'sshpass -p $PASSWORD ssh $USER@$DEPLOYIP "sudo docker run -p 8000:8000 -d --name test --rm $AZURECR/$LOCALIMAGE:$LOCALIMAGETAG"'
+                        withCredentials([string(credentialsId: 'mygittoken', variable: 'SECRET')]) { //set SECRET with the credential content
+                            sh 'sshpass -p $PASSWORD ssh $USER@$DEPLOYIP "git clone https://alphanewbie:${SECRET}@github.com/Alphanewbie/azuremap.git"'
+                        }
+                        withCredentials([usernamePassword( credentialsId: 'alphanewbie', usernameVariable: 'GITUSER', passwordVariable: 'GITPASSWORD')]){
+                            
+                        }
                     }
                 }
             }
