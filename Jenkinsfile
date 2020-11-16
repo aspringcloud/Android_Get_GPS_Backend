@@ -17,7 +17,6 @@ pipeline{
         stage('docker push to azurecr'){
             steps {
                 script{
-                    // 작성해둔 젠킨스 크리덴셜 ID를 넣는다
                     withCredentials([usernamePassword( credentialsId: 'cwleeazurecr', usernameVariable: 'USER', passwordVariable: 'PASSWORD')]){
                         sh "sudo docker login -u $USER -p $PASSWORD $AZURECR"
                         sh "sudo docker tag $LOCALIMAGE:$LOCALIMAGETAG $AZURECR/$LOCALIMAGE:$LOCALIMAGETAG"
@@ -39,7 +38,6 @@ pipeline{
                         sh 'sshpass -p $PASSWORD ssh -o StrictHostKeyChecking=no $USER@$DEPLOYIP'
                         script{
                             withCredentials([usernamePassword( credentialsId: 'cwleeazurecr', usernameVariable: 'CRUSER', passwordVariable: 'CRPASSWORD')]) {
-                                // sh 'ssh $SERVERUSER@$SERVERIP "sudo docker login -u $USER -p $PASSWORD $AZURECR"'
                                 sh 'sshpass -p $PASSWORD ssh $USER@$DEPLOYIP "sudo docker login -u $CRUSER -p $CRPASSWORD $AZURECR"'
                             }
                         }
@@ -47,10 +45,8 @@ pipeline{
                         withCredentials([string(credentialsId: 'mygittoken', variable: 'SECRET')]) { //set SECRET with the credential content
                             sh 'sshpass -p $PASSWORD ssh $USER@$DEPLOYIP "curl -s https://alphanewbie:${SECRET}@raw.githubusercontent.com/Alphanewbie/azuremap/master/docker-compose.yml > docker-compose.yml"'
                         }
-                        // sh 'sshpass -p $PASSWORD ssh $USER@$DEPLOYIP "sudo docker run -p 8000:8000 -d -it -v /home/azureuser/Documents/YMLdir:/code/YMLdir --name test $AZURECR/$LOCALIMAGE:$LOCALIMAGETAG"'
                         sh 'sshpass -p $PASSWORD ssh $USER@$DEPLOYIP "sudo docker-compose up -d"'
                         // sh 'sshpass -p $PASSWORD ssh $USER@$DEPLOYIP "sudo docker rmi $(sudo docker images $AZURECR/$LOCALIMAGE -f dangling=true -q)"'
-                        // sh 'sshpass -p $PASSWORD ssh $USER@$DEPLOYIP "sudo docker rmi $(sudo docker images -f dangling=true -q)"'
                         // sh 'sshpass -p $PASSWORD ssh $USER@$DEPLOYIP "sudo docker images -f "dangling=true" -q | xargs sudo docker rmi -f"'
                         sh 'sshpass -p $PASSWORD ssh $USER@$DEPLOYIP "sudo docker images -f "dangling=true" -q | xargs sudo docker rmi"'
                     }
@@ -59,4 +55,3 @@ pipeline{
         }
     }
 }
-

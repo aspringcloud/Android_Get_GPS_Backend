@@ -1,7 +1,6 @@
 from django.db import models
 from django.conf import settings
 from django.utils import timezone
-# from chunked_upload.models import ChunkedUpload
 import os
 
 
@@ -14,7 +13,6 @@ def get_date_path(filetype, car_num, data_date):
 
 
 def upload_path(instance, filename):
-    get_file_path = instance
     filetype = 'DVR' if instance.camera_pos else 'DTG'
     if instance.camera_pos:
         return os.path.join(get_date_path(filetype, instance.file_to_oplog.cardata.carnum, instance.file_to_oplog.data_date), instance.camera_pos, filename)
