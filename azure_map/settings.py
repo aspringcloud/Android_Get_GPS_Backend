@@ -85,16 +85,25 @@ WSGI_APPLICATION = 'azure_map.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/3.1/ref/settings/#databases
 
+# DATABASES = {
+#     'default': {
+#         'ENGINE': settings['DB']['DB_ENGINE'],
+#         'NAME': settings['DB']['DB_NAME'],
+#         'USER': settings['DB']['DB_USER'],
+#         'PASSWORD': settings['DB']['DB_PASSWORD'],
+#         'HOST': settings['DB']['DB_HOST'],
+#         'PORT': settings['DB']['DB_PORT'],
+#     }
+# }
+
+
 DATABASES = {
     'default': {
-        'ENGINE': settings['DB']['DB_ENGINE'],
-        'NAME': settings['DB']['DB_NAME'],
-        'USER': settings['DB']['DB_USER'],
-        'PASSWORD': settings['DB']['DB_PASSWORD'],
-        'HOST': settings['DB']['DB_HOST'],
-        'PORT': settings['DB']['DB_PORT'],
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': join(BASE_DIR, 'db.sqlite3'),
     }
 }
+
 
 
 # LOGGING
@@ -168,3 +177,7 @@ USE_TZ = True
 AUTH_USER_MODEL = 'accounts.User'
 
 STATIC_URL = '/static/'
+STATIC_ROOT =  '/static/'
+
+MEDIA_URL = 'media/'
+MEDIA_ROOT = 'media/'

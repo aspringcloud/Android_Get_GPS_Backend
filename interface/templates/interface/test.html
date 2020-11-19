@@ -4,6 +4,15 @@
 <head>
 <meta charset="UTF-8">
 <title>Insert title here</title>
+<style>
+{% comment %} .leaflet-marker-pane > * {
+  -webkit-transition: transform 1s linear;
+  -moz-transition: transform 1s linear;
+  -o-transition: transform 1s linear;
+  -ms-transition: transform 1s linear;
+  transition: transform 1s linear;
+} {% endcomment %}
+</style>
  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.5.1/dist/leaflet.css"
    integrity="sha512-xwE/Az9zrjBIphAcBb3F6JVqxf46+CDLwfLMHloNu6KEQCAWi6HcDUbeOfBIptF7tcCzusKFjFw2yuvEpDL9wQ=="
    crossorigin=""/>
@@ -14,31 +23,93 @@
 </head>
 <body>
 <div id="mapid" style="width: 600px; height: 400px;"></div>
+<button id="tracking_start">play</button>
 <script>
-	// 지도 중심이 될 위치.
-	var mymap = L.map('mapid').setView([37.5017, 127.0409], 16);
 
-	L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token=pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4NXVycTA2emYycXBndHRqcmZ3N3gifQ.rJcFIG214AriISLbB6B5aw', {
+	var mymap = L.map('mapid').setView([36.500449, 127.268868], 16);
+
+	L.tileLayer('https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token=pk.eyJ1IjoiY3dsZWUiLCJhIjoiY2tobGQwcDA5MGo3NDJybTlxMXppbHB4ciJ9.C-dxxW2izCOFe0uINyKybQ', {
+		attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, <a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
 		maxZoom: 18,
-		attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, ' +
-			'<a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, ' +
-			'Imagery <a href="https://www.mapbox.com/">Mapbox</a>',
-		id: 'mapbox.streets'
+		id: 'mapbox/streets-v11',
+		tileSize: 512,
+		zoomOffset: -1,
+		accessToken: 'pk.eyJ1IjoiY3dsZWUiLCJhIjoiY2tobGQwcDA5MGo3NDJybTlxMXppbHB4ciJ9.C-dxxW2izCOFe0uINyKybQ'
 	}).addTo(mymap);
 
 	var mark = []
 
+	function style(feature) {
+        return {
+            weight: 2,
+            opacity: 1,
+            color: 'white',
+            dashArray: '',
+            fillOpacity: 1.9,
+            fillColor: 'black'
+        };
+    }
 	{% for item in dtg_datas %}
-		mark[{{forloop.counter0}}] = L.marker([{{item.latitude}}, {{item.longitude}}], {title:"나 2번이야!!"});
+		mark[{{forloop.counter0}}] = L.circleMarker(
+				[{{item.latitude}}, {{item.longitude}}], 
+				{
+					radius : 2,
+					style : style,
+					color : "grey",
+					opacity : 0,
+				}
+			).addTo(mymap);
 	{% endfor %}
+	{% comment %} console.log(mark[0].options)
 	
-	// 맵에 각각 위치에 출력하는 메세지. 마우스를 올리면 타이틀이 뜬다.
-	// 만약 툴팁이나 팝업 쓰면 타이틀 쓰지 말자.
 	var group = L.layerGroup([{% for item in dtg_datas %}
 		mark[{{forloop.counter0}}],
 	{% endfor %}])
 
 	group.addTo(mymap);
+	{% endcomment %}
+	var tracking = document.getElementById('tracking_start');
+	var start = 0;
+	tracking.addEventListener('click', (event) => {
+		var current_car = L.marker([mark[start]._latlng.lat, mark[start]._latlng.lng] /*,
+			{
+				icon: new L.DivIcon({
+					className: 'my-div-icon',
+					html: '<img class="my-div-image" src="http://png-3.vector.me/files/images/4/0/402272/aiga_air_transportation_bg_thumb"/>'+
+						'<span class="my-div-span">RAF Banff Airfield</span>'
+				})
+			}*/
+		).addTo(mymap).bindPopup("<b>1146</b>")
+		var requests = setInterval(() => {
+
+			if(start>0) {
+				current_car.setLatLng(
+					[mark[start]._latlng.lat, mark[start]._latlng.lng]
+				).update();
+			}
+			/*
+			for (var i = 1; i <= 20; i++) {
+				if(start - i < 0) continue;
+				if (start - i %2 == 0) continue;
+				mark[start -i ].setStyle({
+					color : "blue",
+					radius : 10 - i/2,
+					opacity : 1,
+					});;
+			}
+			
+			if(start >= 20) {
+				mark[start-20].setStyle({
+						color : "grey",
+						radius : 2,
+						opacity : 0,
+					});;
+			}
+			*/
+			start++;
+
+        }, 100);
+	}) 
 </script>
 </body>
 </html>

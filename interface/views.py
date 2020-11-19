@@ -1,11 +1,9 @@
 from django.shortcuts import render, HttpResponse
-from .models import DTGDataModel
-import csv
-
+from .models import *
 
 # Create your views here.
 def index(request):
-    dtg_datas = DTGDataModel.objects.filter(oplog = 1)
+    dtg_datas = DTGDataModel.objects.filter(oplog = 20).order_by('datetimes')
 
     context = {
         'dtg_datas' : dtg_datas,
@@ -45,4 +43,15 @@ def index(request):
     # #CSV Data
     # writer.writerows(output)
     # return response
+    return render(request, 'interface/test.html', context)
+
+def test(request):
+    cardatas = CarDataModel.objects.all()
+    dtg_datas = []
+    for cardata in cardatas:
+        now_operations = OperationLogModel.objects.filter(cardata = cardata).first()
+        dtg_datas.append(DTGDataModel.objects.filter(oplog = now_operations).order_by('datetimes'))
+    context = {
+        'dtg_datas' : dtg_datas,
+    }
     return render(request, 'interface/test.html', context)
