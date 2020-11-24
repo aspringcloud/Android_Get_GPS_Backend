@@ -1,0 +1,133 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Insert title here</title>
+<style>
+{% comment %} .leaflet-marker-pane > * {
+  -webkit-transition: transform 1s linear;
+  -moz-transition: transform 1s linear;
+  -o-transition: transform 1s linear;
+  -ms-transition: transform 1s linear;
+  transition: transform 1s linear;
+} {% endcomment %}
+</style>
+ <link rel="stylesheet" href="https://unpkg.com/leaflet@1.5.1/dist/leaflet.css"
+   integrity="sha512-xwE/Az9zrjBIphAcBb3F6JVqxf46+CDLwfLMHloNu6KEQCAWi6HcDUbeOfBIptF7tcCzusKFjFw2yuvEpDL9wQ=="
+   crossorigin=""/>
+<script src="https://unpkg.com/leaflet@1.5.1/dist/leaflet.js"
+   integrity="sha512-GffPMF3RvMeYyc1LWMHtK8EbPv0iNZ8/oTtHPx9/cc2ILxQ+u905qIwdpULaqDkyBKgOaB57QTMg7ztg8Jm2Og=="
+   crossorigin=""></script>
+  
+</head>
+<body>
+<div id="mapid" style="width: 600px; height: 400px;"></div>
+<button id="tracking_start">play</button>
+<script>
+
+	var mymap = L.map('mapid').setView([36.500449, 127.268868], 16);
+
+	L.tileLayer('https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token=pk.eyJ1IjoiY3dsZWUiLCJhIjoiY2tobGQwcDA5MGo3NDJybTlxMXppbHB4ciJ9.C-dxxW2izCOFe0uINyKybQ', {
+		attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, <a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
+		maxZoom: 18,
+		id: 'mapbox/streets-v11',
+		tileSize: 512,
+		zoomOffset: -1,
+		accessToken: 'pk.eyJ1IjoiY3dsZWUiLCJhIjoiY2tobGQwcDA5MGo3NDJybTlxMXppbHB4ciJ9.C-dxxW2izCOFe0uINyKybQ'
+	}).addTo(mymap);
+    var car_data = []
+    {% for cardata in cardatas %}
+        car_data[{{forloop.counter0}}] = '{{cardata.carnum}}'
+    {% endfor %}
+    var point_1146 = []
+    {% for item in 1146_data %}
+        point_1146[{{forloop.counter0}}] = L.circleMarker(
+				[{{item.latitude}}, {{item.longitude}}], 
+				{
+					radius : 2,
+					color : "grey",
+					opacity : 0,
+				}
+			).addTo(mymap);
+    {% endfor %}
+    var point_1147 = []
+    {% for item in 1147_data %}
+        point_1147[{{forloop.counter0}}] = L.circleMarker(
+				[{{item.latitude}}, {{item.longitude}}], 
+				{
+					radius : 2,
+					color : "grey",
+					opacity : 0,
+				}
+			).addTo(mymap);
+    {% endfor %}
+    var point_6894 = []
+    {% for item in 6894_data %}
+        point_6894[{{forloop.counter0}}] = L.circleMarker(
+				[{{item.latitude}}, {{item.longitude}}], 
+				{
+					radius : 2,
+					color : "grey",
+					opacity : 0,
+				}
+			).addTo(mymap);
+    {% endfor %}
+    var point_6895 = []
+    {% for item in 6895_data %}
+        point_6895[{{forloop.counter0}}] = L.circleMarker(
+				[{{item.latitude}}, {{item.longitude}}], 
+				{
+					radius : 2,
+					color : "grey",
+					opacity : 0,
+				}
+			).addTo(mymap);
+    {% endfor %}
+
+    // 여기 추가됨
+    var tracking = document.getElementById('tracking_start');
+	var start = 0;
+	tracking.addEventListener('click', (event) => {
+        if(point_1146[start]){
+            var car_1146 = L.marker([point_1146[start]._latlng.lat, point_1146[start]._latlng.lng]).addTo(mymap).bindPopup("<b>1146</b>")
+        }
+        if(point_1147[start]) {
+            var car_1147 = L.marker([point_1147[start]._latlng.lat, point_1147[start]._latlng.lng]).addTo(mymap).bindPopup("<b>1147</b>")
+        }
+        if(point_6894[start]) {
+            var car_6894 = L.marker([point_6894[start]._latlng.lat, point_6894[start]._latlng.lng]).addTo(mymap).bindPopup("<b>6894</b>")
+        }
+        if(point_6895[start]) {
+            var car_6895 = L.marker([point_6895[start]._latlng.lat, point_6895[start]._latlng.lng]).addTo(mymap).bindPopup("<b>6895</b>")
+        }
+		var requests = setInterval(() => {
+			if(start>0) {
+                if(point_1146[start]) {
+                    car_1146.setLatLng(
+                        [point_1146[start]._latlng.lat, point_1146[start]._latlng.lng]
+                    ).update();
+                }
+                if(point_1147[start]) {
+                    car_1147.setLatLng(
+                        [point_1147[start]._latlng.lat, point_1147[start]._latlng.lng]
+                    ).update();
+                }
+                if(point_6894[start]) {
+                    car_6894.setLatLng(
+                        [point_6894[start]._latlng.lat, point_6894[start]._latlng.lng]
+                    ).update();
+                }
+                if(point_6895[start]) {
+                    car_6895.setLatLng(
+                        [point_6895[start]._latlng.lat, point_6895[start]._latlng.lng]
+                    ).update();
+                }
+			}
+			//mymap.setView([point_1146[start]._latlng.lat, point_1146[start]._latlng.lng]);
+			start++;
+        }, 500);
+	}) 
+</script>
+</body>
+</html>

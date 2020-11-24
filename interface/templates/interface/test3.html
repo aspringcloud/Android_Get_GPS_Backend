@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html>
 <head>
@@ -24,6 +23,7 @@
 <body>
 <div id="mapid" style="width: 600px; height: 400px;"></div>
 <button id="tracking_start">play</button>
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js" type="text/javascript"></script>
 <script>
 
 	var mymap = L.map('mapid').setView([36.500449, 127.268868], 16);
@@ -40,75 +40,27 @@
 
 	var mark = []
 
-	function style(feature) {
-        return {
-            weight: 2,
-            opacity: 1,
-            color: 'white',
-            dashArray: '',
-            fillOpacity: 1.9,
-            fillColor: 'black'
-        };
-    }
-	{% for item in dtg_datas %}
-		mark[{{forloop.counter0}}] = L.circleMarker(
-				[{{item.latitude}}, {{item.longitude}}], 
-				{
-					radius : 2,
-					style : style,
-					color : "grey",
-					opacity : 0.5,
-				}
-			).addTo(mymap);
-	{% endfor %}
-	{% comment %} console.log(mark[0].options)
-	
-	var group = L.layerGroup([{% for item in dtg_datas %}
-		mark[{{forloop.counter0}}],
-	{% endfor %}])
-
-	group.addTo(mymap);
-	{% endcomment %}
 	var tracking = document.getElementById('tracking_start');
 	var start = 0;
 	tracking.addEventListener('click', (event) => {
-		var current_car = L.marker([mark[start]._latlng.lat, mark[start]._latlng.lng] 
-			/*, {
-				icon: new L.DivIcon({
-					className: 'my-div-icon',
-					html: '<img class="my-div-image" src="http://png-3.vector.me/files/images/4/0/402272/aiga_air_transportation_bg_thumb"/>'+
-						'<span class="my-div-span">RAF Banff Airfield</span>'
-				})
-			} */
-		).addTo(mymap).bindPopup("<b>1146</b>")
 		var requests = setInterval(() => {
-			if(start>0) {
-				current_car.setLatLng(
-					[mark[start]._latlng.lat, mark[start]._latlng.lng]
-				).update();
-			}
-			mymap.setView([mark[start]._latlng.lat, mark[start]._latlng.lng]);
+			console.log(new Date());
 			/*
-			for (var i = 1; i <= 20; i++) {
-				if(start - i < 0) continue;
-				if (start - i %2 == 0) continue;
-				mark[start -i ].setStyle({
-					color : "blue",
-					radius : 10 - i/2,
-					opacity : 1,
-					});;
-			}
-			
-			if(start >= 20) {
-				mark[start-20].setStyle({
-						color : "grey",
-						radius : 2,
-						opacity : 0,
-					});;
-			}
-			*/
-			start++;
-
+			axios.get(`/uploadajax`)
+                .then((res) => {
+                    if (res.data.uploading_filename != "false") {
+                        if (res.data) {
+                            uploaded.innerText =
+                                `(${res.data.upload_filenum}/${res.data.all_upload_file})`
+                            progress.innerHTML =
+                                `<p>${res.data.uploading_filename}${Array(i).join(".")}`;
+                            i = (i) % 5 + 1
+                            loadingspiner.style.display = "block"
+                            message.style.display = "block"
+                        }
+                    }
+                }).catch()
+				*/
         }, 1000);
 	}) 
 </script>
