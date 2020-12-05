@@ -52,7 +52,7 @@
     }
 	{% for item in dtg_datas %}
 		mark[{{forloop.counter0}}] = L.circleMarker(
-				[{{item.latitude}}, {{item.longitude}}], 
+				[{{item.avgLatitude}}, {{item.avgLongitude}}], 
 				{
 					radius : 2,
 					style : style,

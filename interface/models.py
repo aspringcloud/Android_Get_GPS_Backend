@@ -73,3 +73,10 @@ class DTGDataModel(models.Model):
     acc_x = models.FloatField()
     acc_y = models.FloatField()
     device_status = models.IntegerField()
+
+    @property
+    def location_field_indexing(self):
+        return {
+            'lat': self.latitude,
+            'lon': self.longitude,
+        }
