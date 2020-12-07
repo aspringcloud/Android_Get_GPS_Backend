@@ -8,6 +8,7 @@ from pytz import timezone, utc
 from django.conf import settings
 import pandas as pd
 import folium
+import random
 import pprint
 
 KST = timezone('Asia/Seoul')
@@ -96,61 +97,63 @@ KST = timezone('Asia/Seoul')
 
 
 def index(request):
-    dtg_datas = DTGDataModel.objects.filter(oplog=20).order_by('datetimes')\
-    .annotate( 
-        minute=TruncMinute('datetimes')
-    ).order_by('minute')\
-    .values(
-        'minute',
-    ).annotate(
-        cnt = Count('minute')
-    ).annotate(
-        avgLongitude=Avg('longitude'),
-        avgLatitude=Avg('latitude'),
-        avgDailyDrive=Avg('daily_drive', output_field=IntegerField()),
-        avgStackDrive=Avg('stack_drive', output_field=IntegerField()),
-        avgSpeed=Avg('speed', output_field=IntegerField()),
-        avgRpm=Avg('rpm'),
-        avgBrakeSignal=Avg('brake_signal'),
-        avgPosition_angle=Avg('position_angle'),
-        avgAccX=Avg('acc_x'),
-        avgAccY=Avg('acc_y'),
-        avgDeviceStatus=Avg('device_status'),
-    ).values(
-        'minute',
-        'avgLongitude',
-        'avgLatitude',
-        'avgDailyDrive',
-        'avgStackDrive',
-        'avgSpeed',
-        'avgRpm',
-        'avgBrakeSignal',
-        'avgPosition_angle',
-        'avgAccX',
-        'avgAccY',
-        'avgDeviceStatus',
-    )
-
-    # print(dtg_datas.count())
-    dtg_datas = pd.DataFrame(list(dtg_datas))
-    location = []
-    print(dtg_datas)
-    m = folium.Map(
-        location=dtg_datas.loc[0, ['avgLatitude','avgLongitude']],
-        zoom_start=20
-    )
     step = 1
-    for i in range(step, len(dtg_datas.index), step):
-        folium.Circle(
-            location = dtg_datas.loc[i, ['avgLatitude','avgLongitude']],
-            radius = 2
-        ).add_to(m)
-        location.append(dtg_datas.loc[i, ['avgLatitude','avgLongitude']])
-    polyline = folium.PolyLine(location,
-            weight=2,
-            opacity=0.8
-            )
-    polyline.add_to(m)
+    m = folium.Map(
+            location=['36.727931', '127.442758'],
+            zoom_start=20
+        )
+    for oplog in OperationLogModel.objects.all():
+        dtg_datas = DTGDataModel.objects.filter(oplog=oplog).order_by('datetimes')\
+        .annotate( 
+            minute=TruncMinute('datetimes')
+        ).order_by('minute')\
+        .values(
+            'minute',
+        ).annotate(
+            cnt = Count('minute')
+        ).annotate(
+            avgLongitude=Avg('longitude'),
+            avgLatitude=Avg('latitude'),
+            avgDailyDrive=Avg('daily_drive', output_field=IntegerField()),
+            avgStackDrive=Avg('stack_drive', output_field=IntegerField()),
+            avgSpeed=Avg('speed', output_field=IntegerField()),
+            avgRpm=Avg('rpm'),
+            avgBrakeSignal=Avg('brake_signal'),
+            avgPosition_angle=Avg('position_angle'),
+            avgAccX=Avg('acc_x'),
+            avgAccY=Avg('acc_y'),
+            avgDeviceStatus=Avg('device_status'),
+        ).values(
+            'minute',
+            'avgLongitude',
+            'avgLatitude',
+            'avgDailyDrive',
+            'avgStackDrive',
+            'avgSpeed',
+            'avgRpm',
+            'avgBrakeSignal',
+            'avgPosition_angle',
+            'avgAccX',
+            'avgAccY',
+            'avgDeviceStatus',
+        )
+        location = []
+        dtg_datas = pd.DataFrame(list(dtg_datas))
+        color = f"#{hex(random.randrange(0,16**6))[2:]}"
+        for i in range(step, len(dtg_datas.index), step):
+            folium.Circle(
+                location = dtg_datas.loc[i, ['avgLatitude','avgLongitude']],
+                radius = 2,
+                color = color ,
+            ).add_to(m)
+            location.append(dtg_datas.loc[i, ['avgLatitude','avgLongitude']])
+        if location :
+            polyline = folium.PolyLine(location,
+                    weight=2,
+                    opacity=0.8,
+                    color = color ,
+                    )
+            polyline.add_to(m)
     # https://github.com/slutske22/leaflet-arrowheads
     m.save(join(settings.BASE_DIR, 'mapDir', 'map.html'))
     context = {
