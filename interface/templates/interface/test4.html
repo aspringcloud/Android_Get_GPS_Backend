@@ -24,7 +24,9 @@
 <button id="tracking_start">play</button>
 <div>
     <ol>
-        <li></li>
+    {% for oplog in operationLogList %}
+        <li>{{oplog.pk}}</li>
+    {% endfor %}
     </ol>
 </div>
 <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js" type="text/javascript"></script>
@@ -60,12 +62,12 @@
             ).addTo(mymap);
     {% endfor %}
 
-    {% for dtg_datas in dtg_datasList %}
+    {% for oplog in operationLogList %}
         var i = {{forloop.counter0}}
         mark[i] = []
-        {% for item in dtg_datas %}
+        {% for dtg_data in oplog.dtg_datas %}
             mark[i][{{forloop.counter0}}] = L.circleMarker(
-                    [{{item.avgLatitude}}, {{item.avgLongitude}}], 
+                    [{{dtg_data.avgLatitude}}, {{dtg_data.avgLongitude}}], 
                     {
                         radius : 5,
                         color: colorList[{{forloop.counter0}}],
@@ -74,6 +76,7 @@
                 ).addTo(mymap);
         {% endfor %}
     {% endfor %}
+
 	var tracking = document.getElementById('tracking_start');
 	var start = 0;
 	tracking.addEventListener('click', (event) => {

@@ -2,7 +2,7 @@ from django.http.response import JsonResponse
 from django.shortcuts import render
 from os.path import join
 from .models import *
-from django.db.models import F,Avg, Count, IntegerField, Func
+from django.db.models import F, Avg, Count, IntegerField, Func
 from django.db.models.functions import TruncMinute
 from pytz import timezone, utc
 from django.conf import settings
@@ -104,16 +104,16 @@ def index(request):
     #     )
     dtg_datasList = []
     locationList = []
-    # for oplog in OperationLogModel.objects.all():
-    for oplog in [19,20,24,25]:
+    for oplog in OperationLogModel.objects.all():
+        # for oplog in [19,20,24,ß25]:
         dtg_datas = DTGDataModel.objects.filter(oplog=oplog).exclude(longitude=0).order_by('datetimes')\
-        .annotate( 
+            .annotate(
             minute=TruncMinute('datetimes')
         ).order_by('minute')\
-        .values(
+            .values(
             'minute',
         ).annotate(
-            cnt = Count('minute')
+            cnt=Count('minute')
         ).annotate(
             avgLongitude=Avg('longitude'),
             avgLatitude=Avg('latitude'),
@@ -150,7 +150,8 @@ def index(request):
             location.append([item['avgLatitude'], item['avgLongitude']])
         locationList.append(location)
     #     dtg_datas = pd.DataFrame(list(dtg_datas))
-    colors = [f"{hex(random.randrange(0,16**6))[2:]}" for _ in range(len(locationList))]
+    colors = [
+        f"{hex(random.randrange(0,16**6))[2:]}" for _ in range(len(locationList))]
     #     for i in range(step, len(dtg_datas.index), step):
     #         folium.Circle(
     #             location = dtg_datas.loc[i, ['avgLatitude','avgLongitude']],
@@ -170,10 +171,81 @@ def index(request):
     # print(dtg_datasList)
     # print(locationList)
     context = {
-        'dtg_datasList' : dtg_datasList,
-        'locationList' : locationList,
-        'colors' : colors,
+        'dtg_datasList': dtg_datasList,
+        'locationList': locationList,
+        'colors': colors,
     }
     # return render(request, 'interface/fatosmap.html', context)
     return render(request, 'interface/test3.html', context)
+    # return JsonResponse(context)
+
+
+def get_json(request):
+    step = 1
+    operationLogList = []
+    locationList = []
+    oplogs = OperationLogModel.objects.all().values(
+                'pk',
+                'detail',
+                'datetimes',
+                'created_at',
+                'distance',
+                'passenger',
+                'isoweeks',
+            )
+    for oplog in oplogs:
+        # for oplog in [19,20,24,ß25]:
+        dtg_datas = DTGDataModel.objects.filter(oplog=oplog.get('pk')).exclude(longitude=0).order_by('datetimes')\
+            .annotate(
+            minute=TruncMinute('datetimes')
+        ).order_by('minute')\
+            .values(
+            'minute',
+        ).annotate(
+            cnt=Count('minute')
+        ).annotate(
+            avgLongitude=Avg('longitude'),
+            avgLatitude=Avg('latitude'),
+            avgDailyDrive=Avg('daily_drive', output_field=IntegerField()),
+            avgStackDrive=Avg('stack_drive', output_field=IntegerField()),
+            avgSpeed=Avg('speed', output_field=IntegerField()),
+            avgRpm=Avg('rpm'),
+            avgBrakeSignal=Avg('brake_signal'),
+            avgPosition_angle=Avg('position_angle'),
+            avgAccX=Avg('acc_x'),
+            avgAccY=Avg('acc_y'),
+            avgDeviceStatus=Avg('device_status'),
+        ).values(
+            'minute',
+            'avgLongitude',
+            'avgLatitude',
+            'avgDailyDrive',
+            'avgStackDrive',
+            'avgSpeed',
+            'avgRpm',
+            'avgBrakeSignal',
+            'avgPosition_angle',
+            'avgAccX',
+            'avgAccY',
+            'avgDeviceStatus',
+        )
+        location = []
+        for item in dtg_datas:
+            # print(item)
+            location.append([item['avgLatitude'], item['avgLongitude']])
+            locationList.append(location)
+        if dtg_datas.count() == 0:
+            continue
+        dtg_datas = list(dtg_datas)
+        oplog['dtg_datas'] = dtg_datas
+        operationLogList.append(oplog)
+
+    colors = [f"{hex(random.randrange(0,16**6))[2:]}" for _ in range(len(locationList))]
+    
+    context = {
+        'operationLogList' : operationLogList,
+        'locationList': locationList,
+        'colors': colors,
+    }
+    return render(request, 'interface/test4.html', context)
     # return JsonResponse(context)
