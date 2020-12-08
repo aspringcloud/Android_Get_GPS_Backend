@@ -65,7 +65,7 @@ TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
         'DIRS': [
-            join(BASE_DIR, 'springcloudlogview', 'templates')
+            join(BASE_DIR, 'azure_map', 'templates')
         ],
         'APP_DIRS': True,
         'OPTIONS': {

@@ -98,12 +98,15 @@ KST = timezone('Asia/Seoul')
 
 def index(request):
     step = 1
-    m = folium.Map(
-            location=['36.727931', '127.442758'],
-            zoom_start=20
-        )
-    for oplog in OperationLogModel.objects.all():
-        dtg_datas = DTGDataModel.objects.filter(oplog=oplog).order_by('datetimes')\
+    # m = folium.Map(
+    #         location=['36.727931', '127.442758'],
+    #         zoom_start=20
+    #     )
+    dtg_datasList = []
+    locationList = []
+    # for oplog in OperationLogModel.objects.all():
+    for oplog in [19,20,24,25]:
+        dtg_datas = DTGDataModel.objects.filter(oplog=oplog).exclude(longitude=0).order_by('datetimes')\
         .annotate( 
             minute=TruncMinute('datetimes')
         ).order_by('minute')\
@@ -138,25 +141,39 @@ def index(request):
             'avgDeviceStatus',
         )
         location = []
-        dtg_datas = pd.DataFrame(list(dtg_datas))
-        color = f"#{hex(random.randrange(0,16**6))[2:]}"
-        for i in range(step, len(dtg_datas.index), step):
-            folium.Circle(
-                location = dtg_datas.loc[i, ['avgLatitude','avgLongitude']],
-                radius = 2,
-                color = color ,
-            ).add_to(m)
-            location.append(dtg_datas.loc[i, ['avgLatitude','avgLongitude']])
-        if location :
-            polyline = folium.PolyLine(location,
-                    weight=2,
-                    opacity=0.8,
-                    color = color ,
-                    )
-            polyline.add_to(m)
-    # https://github.com/slutske22/leaflet-arrowheads
-    m.save(join(settings.BASE_DIR, 'mapDir', 'map.html'))
+        if dtg_datas.count() == 0:
+            continue
+        dtg_datas = list(dtg_datas)
+        dtg_datasList.append(dtg_datas)
+        for item in dtg_datas:
+            # print(item)
+            location.append([item['avgLatitude'], item['avgLongitude']])
+        locationList.append(location)
+    #     dtg_datas = pd.DataFrame(list(dtg_datas))
+    colors = [f"{hex(random.randrange(0,16**6))[2:]}" for _ in range(len(locationList))]
+    #     for i in range(step, len(dtg_datas.index), step):
+    #         folium.Circle(
+    #             location = dtg_datas.loc[i, ['avgLatitude','avgLongitude']],
+    #             radius = 2,
+    #             color = color ,
+    #         ).add_to(m)
+    #         location.append(dtg_datas.loc[i, ['avgLatitude','avgLongitude']])
+    #     if location :
+    #         polyline = folium.PolyLine(location,
+    #                 weight=2,
+    #                 opacity=0.8,
+    #                 color = color ,
+    #                 )
+    #         polyline.add_to(m)
+    # # https://github.com/slutske22/leaflet-arrowheads
+    # m.save(join(settings.BASE_DIR, 'mapDir', 'map.html'))
+    # print(dtg_datasList)
+    # print(locationList)
     context = {
-
+        'dtg_datasList' : dtg_datasList,
+        'locationList' : locationList,
+        'colors' : colors,
     }
-    return render(request, 'interface/test.html')
+    # return render(request, 'interface/fatosmap.html', context)
+    return render(request, 'interface/test3.html', context)
+    # return JsonResponse(context)

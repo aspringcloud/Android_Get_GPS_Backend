@@ -1,25 +1,15 @@
-{% extends "base.html" %}
-
-{% block style %}
-<style>
-    #app {
-        height: 300px;
-        width: 400px;
-        overflow : none;
-    }
-</style>
-{% endblock style %}
-
-{% block contents %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
     <div class="container">
-        <div class="m-2 col-12 h-100">
-            <div id="app"></div>
-        </div>
+        <div id="app"></div>
     </div>
-    <button id="tmp-btn">button</button>
-{% endblock contents %}
 
-{% block script %}
     <script type="text/javascript" src="https://maps.fatos.biz/dist/fatosmap-gl.js"></script>
     <script>
         let LatLng = {lat: 1.28516, lng: 103.84738}
@@ -36,17 +26,9 @@
                 zoomControl: false,
                 draggable: true,
                 rotateControl: true,
-                key: 'rXw5Ah4hZs7Kzg4WzIC6Zie6MUmX1Aq0eEbxSWz4LWc',
+                key: 'rXw5Ah4hZs7Kzg4WzIC6Zie6MUmX1Aq0eEbxSWz4LWc'
             }
         )
-        document.getElementById("tmp-btn").addEventListener("click", function () {
-            console.log(
-            map.getArea([
-                {lng: -122.019807, lat: 45.632433},
-                {lng: -122.019767, lat: 45.632453},
-                {lng: -122.01971, lat: 45.632472}
-            ]));
-        })
-        
     </script>
-{% endblock script %}
+</body>
+</html>
