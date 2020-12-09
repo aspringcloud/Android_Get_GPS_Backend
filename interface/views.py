@@ -8,6 +8,7 @@ from pytz import timezone, utc
 from django.conf import settings
 import pandas as pd
 import folium
+from folium import plugins
 import random
 import pprint
 
@@ -195,7 +196,127 @@ def get_json(request):
             )
     for oplog in oplogs:
         # for oplog in [19,20,24,ß25]:
-        dtg_datas = DTGDataModel.objects.filter(oplog=oplog.get('pk')).exclude(longitude=0).order_by('datetimes')\
+        dtg_datas = getDtgData(oplog)
+        location = []
+        for item in dtg_datas:
+            # print(item)
+            location.append([item['avgLatitude'], item['avgLongitude']])
+        locationList.append(location)
+        if dtg_datas.count() == 0:
+            continue
+        dtg_datas = list(dtg_datas)
+        oplog['dtg_datas'] = dtg_datas
+        operationLogList.append(oplog)
+
+    colors = [f"{hex(random.randrange(1,16**6))[2:]}" for _ in range(len(locationList))]
+    
+    context = {
+        'operationLogList' : operationLogList,
+        'locationList': locationList,
+        'colors': colors,
+    }
+    return render(request, 'interface/test4.html', context)
+    # return JsonResponse(context)
+
+
+def foliums(request):
+    m = folium.Map(
+        location=[36.50070878260868, 127.26875695652177],
+        zoom_start=20
+    )
+    step = 1
+    dtg_datasList = []
+    locationList = []
+    oplogs = OperationLogModel.objects.all().values(
+                'pk',
+                'detail',
+                'datetimes',
+                'created_at',
+                'distance',
+                'passenger',
+                'isoweeks',
+            )
+    lines = []
+    for oplog in oplogs:
+        # for oplog in [19,20,24,ß25]:
+        fg = folium.FeatureGroup(name=f"{oplog.get('datetimes')}")
+        m.add_child(fg)
+        dtg_datas = DTGDataModel.objects.filter(oplog=oplog.get('pk')).exclude(longitude=0).order_by('datetimes').values('latitude','longitude','datetimes')
+        if dtg_datas.count() == 0:
+            continue
+        location = []
+        temp = pd.DataFrame(list(dtg_datas))
+        # print(temp)
+        location.append(temp.loc[0, ['latitude','longitude']])
+        for i in range(1, len(temp.index)):
+            # location.append([item.longitude, item.latitude])
+            # print(temp.loc[i, ['latitude','longitude']])
+            location.append(temp.loc[i, ['latitude','longitude']])
+            lines.append(
+            {
+                "coordinates": [
+                    temp.loc[i-1, ['latitude','longitude']],
+                    temp.loc[i, ['latitude','longitude']],
+                ],
+                "dates": [temp.loc[i-1, ['datetimes']], temp.loc[i, ['datetimes']]],
+                "color": "red",
+            })
+        # print(location)
+        dtg_datas = getDtgData(dtg_datas)
+        dtg_datas = list(dtg_datas)
+        dtg_datas = pd.DataFrame(list(dtg_datas))
+        color = f"#{hex(random.randrange(1,16**6))[2:]}"
+        for i in range(step, len(dtg_datas.index), step):
+            folium.Circle(
+                location = dtg_datas.loc[i, ['avgLatitude','avgLongitude']],
+                color = color,
+                radius = 2,
+            ).add_to(fg)
+        if location :
+            polyline = folium.PolyLine(location,
+                    weight=2,
+                    color = color,
+                    opacity=0.8,
+                )
+            polyline.add_to(fg)
+    features = [
+            {
+                "type": "Feature",
+                "geometry": {
+                    "type": "LineString",
+                    "coordinates": line["coordinates"],
+                },
+                "properties": {
+                    "times": line["dates"],
+                    "style": {
+                        "color": line["color"],
+                        # "weight": line["weight"] if "weight" in line else 5,
+                    },
+                },
+            }
+            for line in lines
+        ]
+    plugins.TimestampedGeoJson(
+        {
+            "type": "FeatureCollection",
+            "features": features,
+        },
+        period="PT1M",
+        add_last_point=True,
+    ).add_to(m)
+    # https://github.com/slutske22/leaflet-arrowheads
+    folium.LayerControl(collapsed=False).add_to(m)
+    m.save(join(settings.BASE_DIR, 'mapDir', 'map2.html'))
+    context = {
+        # 'operationLogList' : operationLogList,
+        'locationList': locationList,
+        'lines' : lines
+    }
+    # return render(request, 'interface/test4.html', context)
+    return JsonResponse(context)
+
+def getDtgData(dtg_datas) :
+    return dtg_datas\
             .annotate(
             minute=TruncMinute('datetimes')
         ).order_by('minute')\
@@ -229,23 +350,3 @@ def get_json(request):
             'avgAccY',
             'avgDeviceStatus',
         )
-        location = []
-        for item in dtg_datas:
-            # print(item)
-            location.append([item['avgLatitude'], item['avgLongitude']])
-            locationList.append(location)
-        if dtg_datas.count() == 0:
-            continue
-        dtg_datas = list(dtg_datas)
-        oplog['dtg_datas'] = dtg_datas
-        operationLogList.append(oplog)
-
-    colors = [f"{hex(random.randrange(0,16**6))[2:]}" for _ in range(len(locationList))]
-    
-    context = {
-        'operationLogList' : operationLogList,
-        'locationList': locationList,
-        'colors': colors,
-    }
-    return render(request, 'interface/test4.html', context)
-    # return JsonResponse(context)

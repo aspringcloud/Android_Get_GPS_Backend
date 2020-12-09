@@ -1,99 +1,145 @@
 <!DOCTYPE html>
 <html>
+
 <head>
-<meta charset="UTF-8">
-<title>Insert title here</title>
-<style>
- .leaflet-marker-pane > * {
-  -webkit-transition: transform 1s linear;
-  -moz-transition: transform 1s linear;
-  -o-transition: transform 1s linear;
-  -ms-transition: transform 1s linear;
-  transition: transform 1s linear;
-}
-</style>
- <link rel="stylesheet" href="https://unpkg.com/leaflet@1.5.1/dist/leaflet.css"
-   integrity="sha512-xwE/Az9zrjBIphAcBb3F6JVqxf46+CDLwfLMHloNu6KEQCAWi6HcDUbeOfBIptF7tcCzusKFjFw2yuvEpDL9wQ=="
-   crossorigin=""/>
-<script src="https://unpkg.com/leaflet@1.5.1/dist/leaflet.js"
-   integrity="sha512-GffPMF3RvMeYyc1LWMHtK8EbPv0iNZ8/oTtHPx9/cc2ILxQ+u905qIwdpULaqDkyBKgOaB57QTMg7ztg8Jm2Og=="
-   crossorigin=""></script>
+    <meta charset="UTF-8">
+    <title>Insert title here</title>
+    <style>
+        .leaflet-marker-pane>* {
+            -webkit-transition: transform 1s linear;
+            -moz-transition: transform 1s linear;
+            -o-transition: transform 1s linear;
+            -ms-transition: transform 1s linear;
+            transition: transform 1s linear;
+        }
+    </style>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.5.1/dist/leaflet.css"
+        integrity="sha512-xwE/Az9zrjBIphAcBb3F6JVqxf46+CDLwfLMHloNu6KEQCAWi6HcDUbeOfBIptF7tcCzusKFjFw2yuvEpDL9wQ=="
+        crossorigin="" />
+    <script src="https://unpkg.com/leaflet@1.5.1/dist/leaflet.js"
+        integrity="sha512-GffPMF3RvMeYyc1LWMHtK8EbPv0iNZ8/oTtHPx9/cc2ILxQ+u905qIwdpULaqDkyBKgOaB57QTMg7ztg8Jm2Og=="
+        crossorigin=""></script>
 </head>
+
 <body>
-<div id="mapid" style="width: 600px; height: 400px;"></div>
-<button id="tracking_start">play</button>
-<div>
-    <ol>
-    {% for oplog in operationLogList %}
-        <li>{{oplog.pk}}</li>
-    {% endfor %}
-    </ol>
-</div>
-<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js" type="text/javascript"></script>
-<script>
+    <div id="mapid" style="width: 600px; height: 400px;"></div>
+    <button id="tracking_start">play</button>
+    <div>
+        <ol>
+            {% for oplog in operationLogList %}
+            <li>
+                <input type="checkbox" value="{{forloop.counter0}}" id ="chkbox{{oplog.pk}}" class="action-select" onclick="checkevent(this)">
+                <label for="chkbox{{oplog.pk}}">
+                    {{oplog.pk}}-{{oplog.datetimes}} <button class="movepos" data-id="{{forloop.counter0}}">move</button>
+                </label>
+            </li>
+            {% endfor %}
+        </ol>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js" type="text/javascript"></script>
+    <script>
+        var mymap = L.map('mapid').setView([36.50070878260868, 127.26875695652177], 16);
 
-	var mymap = L.map('mapid').setView([35.813088, 126.413023], 16);
+        L.tileLayer(
+            'https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token=pk.eyJ1IjoiY3dsZWUiLCJhIjoiY2tobGQwcDA5MGo3NDJybTlxMXppbHB4ciJ9.C-dxxW2izCOFe0uINyKybQ', {
+                attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, <a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
+                maxZoom: 18,
+                id: 'mapbox/streets-v11',
+                //id: 'mapbox/light-v10',
+                tileSize: 512,
+                zoomOffset: -1,
+                accessToken: 'pk.eyJ1IjoiY3dsZWUiLCJhIjoiY2tobGQwcDA5MGo3NDJybTlxMXppbHB4ciJ9.C-dxxW2izCOFe0uINyKybQ'
+            }).addTo(mymap);
 
-	L.tileLayer('https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token=pk.eyJ1IjoiY3dsZWUiLCJhIjoiY2tobGQwcDA5MGo3NDJybTlxMXppbHB4ciJ9.C-dxxW2izCOFe0uINyKybQ', {
-		attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, <a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
-		maxZoom: 18,
-		id: 'mapbox/streets-v11',
-		//id: 'mapbox/light-v10',
-		tileSize: 512,
-		zoomOffset: -1,
-		accessToken: 'pk.eyJ1IjoiY3dsZWUiLCJhIjoiY2tobGQwcDA5MGo3NDJybTlxMXppbHB4ciJ9.C-dxxW2izCOFe0uINyKybQ'
-	}).addTo(mymap);
+        var polyline = []
+        var mark = new Array({{dtg_datasList | length}});
+        var colorList = []
 
-    var polyline = []
-    var mark = new Array({{dtg_datasList|length}});
-    var colorList = []
-
-    {% for color in colors %}
-        colorList[{{forloop.counter0}}] = "#{{color}}"
-    {% endfor %}
-
-    {% for location in locationList %}
-        var latlngs = {{location}};
-        polyline[{{forloop.counter0}}] = L.polyline(
-                latlngs, 
-                {
-                    color: colorList[{{forloop.counter0}}],
-                }
-            ).addTo(mymap);
-    {% endfor %}
-
-    {% for oplog in operationLogList %}
-        var i = {{forloop.counter0}}
-        mark[i] = []
-        {% for dtg_data in oplog.dtg_datas %}
-            mark[i][{{forloop.counter0}}] = L.circleMarker(
-                    [{{dtg_data.avgLatitude}}, {{dtg_data.avgLongitude}}], 
-                    {
-                        radius : 5,
-                        color: colorList[{{forloop.counter0}}],
-                        opacity : 1,
-                    }
-                ).addTo(mymap);
+        {% for color in colors %}
+            colorList[{{forloop.counter0}}] = "#{{color}}"
         {% endfor %}
-    {% endfor %}
 
-	var tracking = document.getElementById('tracking_start');
-	var start = 0;
-	tracking.addEventListener('click', (event) => {
-        var this_tracking = mark[0]
-        var current_car = L.marker(
-                [this_tracking[start]._latlng.lat, this_tracking[start]._latlng.lng] 
-            ).addTo(mymap).bindPopup("<b>1146</b>")
-		var requests = setInterval(() => {
-			if(start>0) {
-				current_car.setLatLng(
-					[this_tracking[start]._latlng.lat, this_tracking[start]._latlng.lng]
-				).update();
-			}
-			mymap.setView([this_tracking[start]._latlng.lat, this_tracking[start]._latlng.lng]);
-            start++;
-        }, 1000);
-	}) 
-</script>
+        {% for location in locationList %}
+            var latlngs = {{location}};
+            polyline[{{forloop.counter0}}] = L.polyline(
+                    latlngs, 
+                    {
+                        color: colorList[{{forloop.counter0}}],
+                    }
+                );
+            
+            {% comment %} polyline[{{forloop.counter0}}].remove(mymap); {% endcomment %}
+        {% endfor %}
+
+        {% for oplog in operationLogList %}
+            var i = {{forloop.counter0}}
+            mark[i] = new Array({{dtg_data|length}});
+            {% for dtg_data in oplog.dtg_datas %}
+                mark[i][{{forloop.counter0}}] = L.circleMarker(
+                        [{{dtg_data.latitude}}, {{dtg_data.longitude}}], 
+                        {
+                            radius : 5,
+                            color: colorList[i],
+                            opacity : 1,
+                        }
+                    );
+            {% endfor %}
+        {% endfor %}
+
+        var tracking = document.getElementById('tracking_start');
+        var start = 0;
+        tracking.addEventListener('click', (event) => {
+            var this_tracking = mark[2]
+            var current_car = L.marker(
+                    [this_tracking[start]._latlng.lat, this_tracking[start]._latlng.lng] 
+                ).addTo(mymap).bindPopup("<b>1146</b>")
+            var requests = setInterval(() => {
+                if(start>0) {
+                    current_car.setLatLng(
+                        [this_tracking[start]._latlng.lat, this_tracking[start]._latlng.lng]
+                    ).update();
+                }
+                mymap.setView([this_tracking[start]._latlng.lat, this_tracking[start]._latlng.lng]);
+                start++;
+            }, 1200);
+        })
+        var moveposes = document.querySelectorAll('.movepos');
+        moveposes.forEach((movepos) => {
+            movepos.addEventListener('click', (event) => {
+                var id = event.target.dataset.id;
+                mymap.setView([mark[id][0]._latlng.lat, mark[id][0]._latlng.lng]);
+                var this_tracking = mark[id]
+                var current_car = L.marker(
+                        [this_tracking[start]._latlng.lat, this_tracking[start]._latlng.lng] 
+                    ).addTo(mymap).bindPopup("<b>1146</b>")
+                var requests = setInterval(() => {
+                    if(start>0) {
+                        current_car.setLatLng(
+                            [this_tracking[start]._latlng.lat, this_tracking[start]._latlng.lng]
+                        ).update();
+                    }
+                    mymap.setView([this_tracking[start]._latlng.lat, this_tracking[start]._latlng.lng]);
+                    start++;
+                }, 1200);
+            })
+        });
+        {% comment %} console.log(polyline) {% endcomment %}
+        function checkevent(event) {
+            var this_row = event.value
+            if(event.checked == true) {
+                polyline[this_row].addTo(mymap);
+                for(var i = 0; i<mark[this_row].length;i++) {
+                    mark[this_row][i].addTo(mymap);
+                }
+            }
+            else {
+                polyline[this_row].remove(mymap);
+                for(var i = 0; i<mark[this_row].length;i++) {
+                    mark[this_row][i].remove(mymap);
+                }
+            }
+        }
+        
+    </script>
 </body>
 </html>
