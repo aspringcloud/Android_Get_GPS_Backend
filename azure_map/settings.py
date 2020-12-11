@@ -176,8 +176,8 @@ USE_TZ = True
 
 AUTH_USER_MODEL = 'accounts.User'
 
-STATIC_URL = '/static/'
-STATIC_ROOT =  '/static/'
+STATIC_URL = 'static/'
+STATIC_ROOT =  'static/'
 
 MEDIA_URL = 'media/'
 MEDIA_ROOT = 'media/'
