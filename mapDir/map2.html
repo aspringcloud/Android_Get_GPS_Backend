@@ -137,22 +137,23 @@
             ).addTo(map_4ffbcd96316a4aa481048e1adc8e6424);
 
             feature_group_8c15c617deae4d9f8d36deee265a391c.on("add",function(){
-                poly_line_3adf86856e854f9aabb35b8e5786ec2b.remove(feature_group_8c15c617deae4d9f8d36deee265a391c);
-                console.log("1")
-                poly_line_3adf86856e854f9aabb35b8e5786ec2b = L.polyline( route
-                    ,
-                    {"bubblingMouseEvents": true, "color": "#b8a275", "dashArray": null, "dashOffset": null, "fill": false, "fillColor": "#b8a275", "fillOpacity": 0.2, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "noClip": false, "opacity": 1.0, "smoothFactor": 1.0, "stroke": true, "weight": 7}
-                ).addTo(feature_group_8c15c617deae4d9f8d36deee265a391c);
-                console.log("2")
-                // poly_line_3adf86856e854f9aabb35b8e5786ec2b.addTo(feature_group_8c15c617deae4d9f8d36deee265a391c);
-                /*
                 map_4ffbcd96316a4aa481048e1adc8e6424.removeLayer(feature_group_8c15c617deae4d9f8d36deee265a391c);
-                feature_group_8c15c617deae4d9f8d36deee265a391c = L.featureGroup(
-                    {}
-                ).addTo(map_4ffbcd96316a4aa481048e1adc8e6424);
+                /*
+                feature_group_8c15c617deae4d9f8d36deee265a391c = L.featureGroup([
+                    L.marker(trd),
+                    L.polyline([trd, ams]),
+                    L.marker(ams),
+                    L.polyline([ams, lnd]),
+                    L.marker(lnd),
+                    L.polyline([lnd, mad]),
+                    L.marker(mad),
+                    L.polyline([mad, vlc]),
+                    L.marker(vlc)
+                ]);*/
+                map_4ffbcd96316a4aa481048e1adc8e6424.fitBounds(feature_group_8c15c617deae4d9f8d36deee265a391c.getBounds());
                 map_4ffbcd96316a4aa481048e1adc8e6424.addLayer(feature_group_8c15c617deae4d9f8d36deee265a391c);
-                */
-                poly_line_3adf86856e854f9aabb35b8e5786ec2b.snakeIn()
+                layer_control_2d6c7dd423e043d286a27959e4411910.overlays[0] = feature_group_8c15c617deae4d9f8d36deee265a391c;
+                feature_group_8c15c617deae4d9f8d36deee265a391c.snakeIn()
             });
             feature_group_82ae8f709ad341c6b8608f7bb7014ee4.on("add",function(){
                 // map_4ffbcd96316a4aa481048e1adc8e6424.removeLayer(feature_group_8c15c617deae4d9f8d36deee265a391c)
