@@ -141,7 +141,7 @@ def foliums(request):
     step = 1
     dtg_datasList = []
     locationList = []
-    oplogs = OperationLogModel.objects.all().order_by('datetimes').values(
+    oplogs = OperationLogModel.objects.filter(pk=1).order_by('datetimes').values(
                 'pk',
                 'detail',
                 'datetimes',
@@ -190,23 +190,6 @@ def foliums(request):
                     # opacity=0.8,
                 )
             polyline.add_to(fg)
-        # dtg_datas = getDtgData(dtg_datas)
-        # dtg_datas = list(dtg_datas)
-        # dtg_datas = pd.DataFrame(list(dtg_datas))
-        # color = f"#{hex(random.randrange(1,16**6))[2:]}"
-        # for i in range(step, len(dtg_datas.index), step):
-        #     folium.Circle(
-        #         location = dtg_datas.loc[i, ['avgLatitude','avgLongitude']],
-        #         color = color,
-        #         radius = 2,
-        #     ).add_to(fg)
-        # if location :
-        #     polyline = folium.PolyLine(location,
-        #             weight=6,
-        #             color = color,
-        #             opacity=0.8,
-        #         )
-        #     polyline.add_to(fg)
     # https://github.com/slutske22/leaflet-arrowheads
     folium.LayerControl(collapsed=False).add_to(m)
 
@@ -231,18 +214,18 @@ def foliums(request):
         }
         for line in lines
     ]
-    # plugins.TimestampedGeoJson(
-    #     {
-    #         "type": "FeatureCollection",
-    #         "features": features,
-    #     },
-    #     period="PT1S",
-    #     auto_play=False,
-    #     loop=False,
-    #     # max_speed=1,
-    #     duration=f'PT{stamp}S',
-    #     time_slider_drag_update=True,
-    # ).add_to(m)
+    plugins.TimestampedGeoJson(
+        {
+            "type": "FeatureCollection",
+            "features": features,
+        },
+        period="PT1S",
+        auto_play=False,
+        loop=False,
+        # max_speed=1,
+        duration=f'PT{stamp}S',
+        time_slider_drag_update=True,
+    ).add_to(m)
 
     m.save(join(settings.BASE_DIR, 'mapDir', 'map2.html'))
     context = {
@@ -290,3 +273,67 @@ def getDtgData(dtg_datas) :
             'avgAccY',
             'avgDeviceStatus',
         )
+
+
+def foliumsEdit(request):
+    polylineList = []
+    oplogs = OperationLogModel.objects.all().order_by('datetimes').values(
+                'pk',
+                'detail',
+                'datetimes',
+                'created_at',
+                'distance',
+                'passenger',
+                'isoweeks',
+            )
+    features = []
+    stamp = 10
+    for oplog in oplogs:
+        dtg_datas = DTGDataModel.objects.filter(oplog=oplog.get('pk')).exclude(longitude=0).order_by('datetimes').values('latitude','longitude','datetimes')
+        if dtg_datas.count() == 0:
+            continue
+        location = []
+        temp = pd.DataFrame(list(dtg_datas))
+        location.append([dtg_datas[0].get('latitude'), dtg_datas[0].get('longitude')] )
+        color = f"#{hex(random.randrange(1,16**6))[2:]}"
+        for i in range(stamp, len(temp.index)):
+            if (i%stamp != 0):
+                continue
+            location.append([dtg_datas[i].get('latitude'), dtg_datas[i].get('longitude')])
+            features.append(
+                {
+                    "type":"Feature",
+                    "geometry":{
+                        "type":"LineString",
+                        "coordinates": [
+                            [dtg_datas[i-stamp].get('longitude'), dtg_datas[i-stamp].get('latitude')],
+                            [dtg_datas[i].get('longitude'), dtg_datas[i].get('latitude')],
+                        ],
+                    },
+                    "properties": {
+                        "times": [dtg_datas[i-stamp].get('datetimes').strftime('%Y-%m-%dT%H:%M:%S'), dtg_datas[i].get('datetimes').strftime('%Y-%m-%dT%H:%M:%S')],
+                        "style":{
+                            "weight":7,
+                            "strokeColor":"black",
+                            "strokeOpacity":1.0,
+                            "strokeWeight":4,
+                            "opacity":1,
+                            "colors":color,
+                        }
+                    }
+                }
+            )
+        polylineList.append({
+            'oplog' : oplog,
+            'poltline' : location,
+            'color' : color
+            })
+    context = {
+        'polylineList': polylineList,
+        'FeatureCollection' : {
+            "type":"FeatureCollection",
+            'features' : features,
+        } 
+    }
+    return render(request, 'interface/foliumsEdit.html', context)
+    # return JsonResponse(context)
