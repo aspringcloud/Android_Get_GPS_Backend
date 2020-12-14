@@ -11,6 +11,8 @@
     <script src="https://cdn.jsdelivr.net/npm/leaflet@1.6.0/dist/leaflet.js"></script>
     <script src="https://code.jquery.com/jquery-1.12.4.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
+    <script src="/static/js/leaflet-geometryutil.js"></script>
+    <script src="/static/js/leaflet-arrowheads.js"></script>
     <script src="/static/js/L.Polyline.SnakeAnim.js"></script>
     <script
         src="https://cdnjs.cloudflare.com/ajax/libs/Leaflet.awesome-markers/2.0.2/leaflet.awesome-markers.js"></script>
@@ -93,6 +95,7 @@
     var poly_lines = []
     var route = []
     var colors = []
+
     {% for polyline in polylineList %}
     colors[{{forloop.counter0}}] = "{{polyline.color}}"
     feature_groups[{{forloop.counter0}}] = L.featureGroup(
@@ -100,7 +103,7 @@
     ).addTo(map_dd0006a989594d36a6e96cb45d545116);
     route[{{forloop.counter0}}] = {{polyline.poltline}}
     poly_lines[{{forloop.counter0}}] = L.polyline(route[{{forloop.counter0}}], { "bubblingMouseEvents": true, "color": colors[{{forloop.counter0}}], "dashArray": null, "dashOffset": null, "fill": false, "fillColor": "#e4b372", "fillOpacity": 0.2, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "noClip": false, "opacity": 1.0, "smoothFactor": 1.0, "stroke": true, "weight": 7 }
-    ).addTo(feature_groups[{{forloop.counter0}}]);
+    ).arrowheads( {frequency: 'endonly', size: '40%'} ).addTo(feature_groups[{{forloop.counter0}}]);
     poly_lines[{{forloop.counter0}}].snakeIn()
     {% endfor %}
 
@@ -215,7 +218,7 @@
         poly_lines[{{forloop.counter0}}] = L.polyline( route[{{forloop.counter0}}]
             ,
             {"bubblingMouseEvents": true, "color": colors[{{forloop.counter0}}], "dashArray": null, "dashOffset": null, "fill": false, "fillColor": "#b8a275", "fillOpacity": 0.2, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "noClip": false, "opacity": 1.0, "smoothFactor": 1.0, "stroke": true, "weight": 7}
-        ).addTo(feature_groups[{{forloop.counter0}}]);
+        ).arrowheads( {frequency: 'endonly', size: '40%'} ).addTo(feature_groups[{{forloop.counter0}}]);
         map_dd0006a989594d36a6e96cb45d545116.fitBounds(feature_groups[{{forloop.counter0}}].getBounds());
         poly_lines[{{forloop.counter0}}].snakeIn()
     });
