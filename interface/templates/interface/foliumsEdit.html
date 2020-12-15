@@ -102,8 +102,7 @@
         {}
     ).addTo(map_dd0006a989594d36a6e96cb45d545116);
     route[{{forloop.counter0}}] = {{polyline.poltline}}
-    poly_lines[{{forloop.counter0}}] = L.polyline(route[{{forloop.counter0}}], { "bubblingMouseEvents": true, "color": colors[{{forloop.counter0}}], "dashArray": null, "dashOffset": null, "fill": false, "fillColor": "#e4b372", "fillOpacity": 0.2, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "noClip": false, "opacity": 1.0, "smoothFactor": 1.0, "stroke": true, "weight": 7 }
-    ).arrowheads( {frequency: 'endonly', size: '40%'} ).addTo(feature_groups[{{forloop.counter0}}]);
+    poly_lines[{{forloop.counter0}}] = getPoltLine(route[{{forloop.counter0}}], colors[{{forloop.counter0}}]).addTo(feature_groups[{{forloop.counter0}}]);
     poly_lines[{{forloop.counter0}}].snakeIn()
     {% endfor %}
 
@@ -215,13 +214,17 @@
     {% for polyline in polylineList %}
     feature_groups[{{forloop.counter0}}].on("add",function(){
         feature_groups[{{forloop.counter0}}].removeLayer(poly_lines[{{forloop.counter0}}]);
-        poly_lines[{{forloop.counter0}}] = L.polyline( route[{{forloop.counter0}}]
-            ,
-            {"bubblingMouseEvents": true, "color": colors[{{forloop.counter0}}], "dashArray": null, "dashOffset": null, "fill": false, "fillColor": "#b8a275", "fillOpacity": 0.2, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "noClip": false, "opacity": 1.0, "smoothFactor": 1.0, "stroke": true, "weight": 7}
-        ).arrowheads( {frequency: 'endonly', size: '40%'} ).addTo(feature_groups[{{forloop.counter0}}]);
+        poly_lines[{{forloop.counter0}}] = getPoltLine(route[{{forloop.counter0}}], colors[{{forloop.counter0}}]).addTo(feature_groups[{{forloop.counter0}}]);
         map_dd0006a989594d36a6e96cb45d545116.fitBounds(feature_groups[{{forloop.counter0}}].getBounds());
         poly_lines[{{forloop.counter0}}].snakeIn()
     });
     {% endfor %}
     
+    function getPoltLine(route, color) {
+        return L.polyline( route
+            ,
+            {"bubblingMouseEvents": true, "color": color, "dashArray": null, "dashOffset": null, "fill": false, "fillColor": "#b8a275", "fillOpacity": 0.2, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "noClip": false, "opacity": 1.0, "smoothFactor": 1.0, "stroke": true, "weight": 7}
+        ).arrowheads( {frequency: 'endonly', size: '40%'} );
+    }
+
 </script>

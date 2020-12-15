@@ -7,7 +7,6 @@ RUN apt-get update \
 RUN mkdir /code
 WORKDIR /code 
 ADD . /code/
-RUN mkdir /code/Log
 RUN pip install --upgrade pip \
     && pip install -r requirements.txt 
 
