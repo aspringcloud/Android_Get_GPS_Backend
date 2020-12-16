@@ -6,6 +6,7 @@ from django.db.models import F, Avg, Count, IntegerField, Func
 from django.db.models.functions import TruncMinute
 from pytz import timezone, utc
 from django.conf import settings
+import datetime
 import pandas as pd
 import folium
 from folium import plugins
@@ -276,6 +277,7 @@ def getDtgData(dtg_datas) :
 
 
 def foliumsEdit(request):
+    KST = datetime.timedelta(hours=9)
     polylineList = []
     oplogs = OperationLogModel.objects.all().order_by('datetimes').values(
                 'pk',
@@ -289,6 +291,7 @@ def foliumsEdit(request):
     features = []
     stamp = 10
     for oplog in oplogs:
+        
         dtg_datas = DTGDataModel.objects.filter(oplog=oplog.get('pk')).exclude(longitude=0).order_by('datetimes').values('latitude','longitude','datetimes')
         if dtg_datas.count() == 0:
             continue
@@ -311,7 +314,7 @@ def foliumsEdit(request):
                         ],
                     },
                     "properties": {
-                        "times": [dtg_datas[i-stamp].get('datetimes').strftime('%Y-%m-%dT%H:%M:%S'), dtg_datas[i].get('datetimes').strftime('%Y-%m-%dT%H:%M:%S')],
+                        "times": [(dtg_datas[i-stamp].get('datetimes')+KST).strftime('%Y-%m-%dT%H:%M:%S'), (dtg_datas[i].get('datetimes')+KST).strftime('%Y-%m-%dT%H:%M:%S')],
                         "style":{
                             "weight":7,
                             "strokeColor":"black",
@@ -337,3 +340,70 @@ def foliumsEdit(request):
     }
     return render(request, 'interface/foliumsEdit.html', context)
     # return JsonResponse(context)
+
+
+def getData(request):
+    KST = datetime.timedelta(hours=9)
+    polylineList = []
+    oplogs = OperationLogModel.objects.all().order_by('datetimes').values(
+                'pk',
+                'detail',
+                'datetimes',
+                'created_at',
+                'distance',
+                'passenger',
+                'isoweeks',
+            )
+    features = []
+    stamp = 10
+    print(oplogs.query)
+    for oplog in oplogs:
+        dtg_datas = DTGDataModel.objects.filter(oplog=oplog.get('pk')).exclude(longitude=0).order_by('datetimes').values('latitude','longitude','datetimes')
+        if dtg_datas.count() == 0:
+            continue
+        location = []
+        
+        temp = pd.DataFrame(list(dtg_datas))
+        location.append([dtg_datas[0].get('latitude'), dtg_datas[0].get('longitude')] )
+        color = f"#{hex(random.randrange(1,16**6))[2:]}"
+        for i in range(stamp, len(temp.index)):
+            if (i%stamp != 0):
+                continue
+            location.append([dtg_datas[i].get('latitude'), dtg_datas[i].get('longitude')])
+            features.append(
+                {
+                    "type":"Feature",
+                    "geometry":{
+                        "type":"LineString",
+                        "coordinates": [
+                            [dtg_datas[i-stamp].get('longitude'), dtg_datas[i-stamp].get('latitude')],
+                            [dtg_datas[i].get('longitude'), dtg_datas[i].get('latitude')],
+                        ],
+                    },
+                    "properties": {
+                        "times": [(dtg_datas[i-stamp].get('datetimes')+KST).strftime('%Y-%m-%dT%H:%M:%S'), (dtg_datas[i].get('datetimes')+KST).strftime('%Y-%m-%dT%H:%M:%S')],
+                        "style":{
+                            "weight":7,
+                            "strokeColor":"black",
+                            "strokeOpacity":1.0,
+                            "strokeWeight":4,
+                            "opacity":1,
+                            "colors":color,
+                        }
+                    }
+                }
+            )
+        polylineList.append({
+            'oplog' : oplog,
+            'poltline' : location,
+            'color' : color
+            })
+    context = {
+        'polylineList': polylineList,
+        'FeatureCollection' : {
+            "type":"FeatureCollection",
+            'features' : features,
+        } 
+    }
+    # return render(request, 'interface/foliumsEdit.html', context)
+    return JsonResponse(context)
