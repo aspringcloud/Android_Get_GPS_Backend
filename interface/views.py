@@ -281,40 +281,32 @@ def foliumsEdit(request):
     polylineList = []
     oplogs = OperationLogModel.objects.all().order_by('datetimes').values(
                 'pk',
-                'detail',
                 'datetimes',
-                'created_at',
-                'distance',
-                'passenger',
-                'isoweeks',
             )
     features = []
-    stamp = 10
+    stamp = 1
     for oplog in oplogs:
-        
-        dtg_datas = DTGDataModel.objects.filter(oplog=oplog.get('pk')).exclude(longitude=0).order_by('datetimes').values('latitude','longitude','datetimes')
-        if dtg_datas.count() == 0:
-            continue
+        dtg_datas = getDtgData(DTGDataModel.objects.filter(oplog=oplog.get('pk')).exclude(longitude=0).order_by('datetimes'))
         location = []
         temp = pd.DataFrame(list(dtg_datas))
-        location.append([dtg_datas[0].get('latitude'), dtg_datas[0].get('longitude')] )
+        location.append([dtg_datas[0].get('avgLatitude'), dtg_datas[0].get('avgLongitude')] )
         color = f"#{hex(random.randrange(1,16**6))[2:]}"
         for i in range(stamp, len(temp.index)):
             if (i%stamp != 0):
                 continue
-            location.append([dtg_datas[i].get('latitude'), dtg_datas[i].get('longitude')])
+            location.append([dtg_datas[i].get('avgLatitude'), dtg_datas[i].get('avgLongitude')])
             features.append(
                 {
                     "type":"Feature",
                     "geometry":{
                         "type":"LineString",
                         "coordinates": [
-                            [dtg_datas[i-stamp].get('longitude'), dtg_datas[i-stamp].get('latitude')],
-                            [dtg_datas[i].get('longitude'), dtg_datas[i].get('latitude')],
+                            [dtg_datas[i-stamp].get('avgLongitude'), dtg_datas[i-stamp].get('avgLatitude')],
+                            [dtg_datas[i].get('avgLongitude'), dtg_datas[i].get('avgLatitude')],
                         ],
                     },
                     "properties": {
-                        "times": [(dtg_datas[i-stamp].get('datetimes')+KST).strftime('%Y-%m-%dT%H:%M:%S'), (dtg_datas[i].get('datetimes')+KST).strftime('%Y-%m-%dT%H:%M:%S')],
+                        "times": [(dtg_datas[i-stamp].get('minute')+KST).strftime('%Y-%m-%dT%H:%M:%S'), (dtg_datas[i].get('minute')+KST).strftime('%Y-%m-%dT%H:%M:%S')],
                         "style":{
                             "weight":7,
                             "strokeColor":"black",

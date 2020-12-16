@@ -133,7 +133,7 @@
     });
     map_dd0006a989594d36a6e96cb45d545116.timeDimension = L.timeDimension(
         {
-            period: "PT1S",
+            period: "PT5S",
         }
     );
     var timeDimensionControl = new L.Control.TimeDimensionCustom(
@@ -142,34 +142,7 @@
     map_dd0006a989594d36a6e96cb45d545116.addControl(this.timeDimensionControl);
 
     var geoJsonLayer = L.geoJson(
-        {
-            "type": "FeatureCollection",
-            "features": 
-            [
-                {% for features in FeatureCollection.features %}
-                {
-                    "type":"Feature",
-                    "geometry":{
-                        "type":"LineString",
-                        "coordinates": 
-                            {{features.geometry.coordinates}}
-                        ,
-                    },
-                    "properties": {
-                        "times": {{features.properties.times|safe}},
-                        "style":{
-                            "weight":7,
-                            "strokeColor":"black",
-                            "strokeOpacity":1.0,
-                            "strokeWeight":4,
-                            "opacity":1,
-
-                        }
-                    }
-                },
-                {% endfor %}
-            ]
-        }, {
+        {{FeatureCollection|safe}}, {
         pointToLayer: function (feature, latLng) {
             if (feature.properties.icon == 'marker') {
                 if (feature.properties.iconstyle) {
@@ -208,7 +181,7 @@
         {
             updateTimeDimension: true,
             addlastPoint: true,
-            duration: "PT10S",
+            duration: "PT5S",
         }
     ).addTo(map_dd0006a989594d36a6e96cb45d545116);
 
@@ -226,7 +199,7 @@
         return L.polyline( route
             ,
             {"bubblingMouseEvents": true, "color": color, "dashArray": null, "dashOffset": null, "fill": false, "fillColor": "#b8a275", "fillOpacity": 0.2, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "noClip": false, "opacity": 1.0, "smoothFactor": 1.0, "stroke": true, "weight": 7}
-        ).arrowheads( {frequency: 'endonly', size: '40%'} );
+        ).arrowheads( {frequency: 'endonly', size: '20%'} );
     }
 
 </script>
