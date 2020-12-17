@@ -313,7 +313,7 @@ def foliumsEdit(request):
                         ],
                     },
                     "properties": {
-                        "times": [(dtg_datas[i-stamp].get('minute')).strftime('%Y-%m-%dT%H:%M:%S'), (dtg_datas[i].get('minute')).strftime('%Y-%m-%dT%H:%M:%S')],
+                        "times": [(dtg_datas[i-stamp].get('minute')+KST).strftime('%Y-%m-%dT%H:%M:%S'), (dtg_datas[i].get('minute')+KST).strftime('%Y-%m-%dT%H:%M:%S')],
                         "style":{
                             "weight":7,
                             "strokeColor":"black",
