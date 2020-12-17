@@ -15,7 +15,7 @@ import pprint
 
 KST = timezone('Asia/Seoul')
 
-# Create your views here.
+# 필요 없는 메소드, 예전에 테스트 하고자 만들었던 함수
 def index(request):
     step = 1
     dtg_datasList = []
@@ -95,7 +95,7 @@ def index(request):
     return render(request, 'interface/map2.html', context)
     # return JsonResponse(context)
 
-
+# 필요 없는 메소드 : 테스트용
 def get_json(request):
     step = 1
     operationLogList = []
@@ -134,6 +134,10 @@ def get_json(request):
     # return JsonResponse(context)
 
 
+# 폴레니움 맵을 만드는 매소드 : 이걸 기반으로 만들어 지면 그걸 수정하는 방식으로 만들었습니다.
+# 만들어진 맵에 붙힌 모듈 : 
+# snakeIn : https://github.com/IvanSanchez/Leaflet.Polyline.SnakeAnim
+# arrowhead : https://github.com/slutske22/leaflet-arrowheads
 def foliums(request):
     m = folium.Map(
         location=[36.50070878260868, 127.26875695652177],
@@ -238,7 +242,7 @@ def foliums(request):
     return JsonResponse(context)
 
 
-
+# 데이터를 분 단위로 잘라서 평균낸 퀴리문을 반환해 주는 메소드
 def getDtgData(dtg_datas) :
     return dtg_datas\
             .annotate(
@@ -276,17 +280,20 @@ def getDtgData(dtg_datas) :
         )
 
 
+# 만들어진 foliums map과 데이터 데이스에서 데이터를 가져와 build를 만들어 주는 부분
 def foliumsEdit(request):
+    # print(KST)
     KST = datetime.timedelta(hours=9)
     polylineList = []
+    FeatureCollection = []
     oplogs = OperationLogModel.objects.all().order_by('datetimes').values(
                 'pk',
                 'datetimes',
             )
-    features = []
     stamp = 1
     for oplog in oplogs:
         dtg_datas = getDtgData(DTGDataModel.objects.filter(oplog=oplog.get('pk')).exclude(longitude=0).order_by('datetimes'))
+        features = []
         location = []
         temp = pd.DataFrame(list(dtg_datas))
         location.append([dtg_datas[0].get('avgLatitude'), dtg_datas[0].get('avgLongitude')] )
@@ -306,7 +313,7 @@ def foliumsEdit(request):
                         ],
                     },
                     "properties": {
-                        "times": [(dtg_datas[i-stamp].get('minute')+KST).strftime('%Y-%m-%dT%H:%M:%S'), (dtg_datas[i].get('minute')+KST).strftime('%Y-%m-%dT%H:%M:%S')],
+                        "times": [(dtg_datas[i-stamp].get('minute')).strftime('%Y-%m-%dT%H:%M:%S'), (dtg_datas[i].get('minute')).strftime('%Y-%m-%dT%H:%M:%S')],
                         "style":{
                             "weight":7,
                             "strokeColor":"black",
@@ -321,19 +328,22 @@ def foliumsEdit(request):
         polylineList.append({
             'oplog' : oplog,
             'poltline' : location,
-            'color' : color
+            'color' : color,
             })
+        FeatureCollection.append(features)
     context = {
         'polylineList': polylineList,
-        'FeatureCollection' : {
-            "type":"FeatureCollection",
-            'features' : features,
-        } 
+        # 'FeatureCollection' : {
+        #     "type":"FeatureCollection",
+        #     'features' : features,
+        # } 
+        'FeatureCollection' : FeatureCollection,
     }
     return render(request, 'interface/foliumsEdit.html', context)
     # return JsonResponse(context)
 
 
+# 또 테스트 하는 부분
 def getData(request):
     KST = datetime.timedelta(hours=9)
     polylineList = []
@@ -348,7 +358,6 @@ def getData(request):
             )
     features = []
     stamp = 10
-    print(oplogs.query)
     for oplog in oplogs:
         dtg_datas = DTGDataModel.objects.filter(oplog=oplog.get('pk')).exclude(longitude=0).order_by('datetimes').values('latitude','longitude','datetimes')
         if dtg_datas.count() == 0:

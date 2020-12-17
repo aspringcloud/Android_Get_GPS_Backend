@@ -81,6 +81,7 @@
             zoom: 20,
             zoomControl: true,
             preferCanvas: false,
+            fullscreenControl: true,
         }
     );
 
@@ -123,26 +124,50 @@
         { "autoZIndex": true, "collapsed": false, "position": "topright" }
     ).addTo(map_dd0006a989594d36a6e96cb45d545116);
 
-
     L.Control.TimeDimensionCustom = L.Control.TimeDimension.extend({
         _getDisplayDateFormat: function (date) {
             var newdate = new moment(date);
-            console.log(newdate)
+            // console.log(newdate)
             return newdate.format("YYYY-MM-DD HH:mm:ss");
         }
     });
-    map_dd0006a989594d36a6e96cb45d545116.timeDimension = L.timeDimension(
+
+    var timeDimension = L.timeDimension(
         {
             period: "PT5S",
+            
         }
     );
+    map_dd0006a989594d36a6e96cb45d545116.timeDimension = timeDimension;
     var timeDimensionControl = new L.Control.TimeDimensionCustom(
         { "autoPlay": false, "loopButton": false, "maxSpeed": 10, "minSpeed": 0.1, "playerOptions": { "loop": false, "startOver": true, "transitionTime": 200 }, "position": "bottomleft", "timeSliderDragUpdate": true }
     );
-    map_dd0006a989594d36a6e96cb45d545116.addControl(this.timeDimensionControl);
+    map_dd0006a989594d36a6e96cb45d545116.addControl(this.timeDimensionControl); 
+
+
+
+    var featureCollection = []
+    {% for feature in FeatureCollection %}
+        featureCollection[{{forloop.counter0}}] = {{feature|safe}}
+    {% endfor %}
+    
+    var feature = []
+    for(var i = 0; i<featureCollection.length; i++) {
+        feature = feature.concat(featureCollection[i])
+    }
+
+    var icon = L.icon({
+        iconUrl: '/media/mark/bus-alt-solid.svg',
+        iconSize: [22, 22],
+        iconAnchor: [5, 25]
+    });
+
 
     var geoJsonLayer = L.geoJson(
-        {{FeatureCollection|safe}}, {
+        {
+            "type":"FeatureCollection",
+            'features' : feature,
+        }, {
         pointToLayer: function (feature, latLng) {
             if (feature.properties.icon == 'marker') {
                 if (feature.properties.iconstyle) {
@@ -174,24 +199,95 @@
         }
     })
 
-    console.log(geoJsonLayer)
-
     var timestamped_geo_json_6872e495c2294c8895578f2009afccb0 = L.timeDimension.layer.geoJson(
         geoJsonLayer,
         {
             updateTimeDimension: true,
             addlastPoint: true,
-            duration: "PT5S",
+            duration: "PT1M",
+            //updateTimeDimensionMode: 'replace',
         }
     ).addTo(map_dd0006a989594d36a6e96cb45d545116);
 
-
+    {% comment %} var timestamped_geo_json_6872e495c2294c8895578f2009afccb0 = null;
+    var timeDimensionControl = null;
+    var timestamped_geo_json_6872e495c2294c8895578f2009afccb0; {% endcomment %}
     {% for polyline in polylineList %}
     feature_groups[{{forloop.counter0}}].on("add",function(){
         feature_groups[{{forloop.counter0}}].removeLayer(poly_lines[{{forloop.counter0}}]);
         poly_lines[{{forloop.counter0}}] = getPoltLine(route[{{forloop.counter0}}], colors[{{forloop.counter0}}]).addTo(feature_groups[{{forloop.counter0}}]);
         map_dd0006a989594d36a6e96cb45d545116.fitBounds(feature_groups[{{forloop.counter0}}].getBounds());
         poly_lines[{{forloop.counter0}}].snakeIn()
+        
+        timeDimension.setCurrentTime(featureCollection[{{forloop.counter0}}][0].properties.times[0])
+        /*
+        var geoJsonLayer = L.geoJson(
+            {
+                "type":"FeatureCollection",
+                'features' : featureCollection[{{forloop.counter0}}]//.concat(featureCollection[1])
+            }, {
+            pointToLayer: function (feature, latLng) {
+                if (feature.properties.icon == 'marker') {
+                    if (feature.properties.iconstyle) {
+                        return new L.Marker(latLng, {
+                            icon: L.icon(feature.properties.iconstyle)
+                        });
+                    }
+                    //else
+                    return new L.Marker(latLng);
+                }
+                if (feature.properties.icon == 'circle') {
+                    if (feature.properties.iconstyle) {
+                        return new L.circleMarker(latLng, feature.properties.iconstyle)
+                    };
+                    //else
+                    return new L.circleMarker(latLng);
+                }
+                //else
+
+                return new L.Marker(latLng);
+            },
+            style: function (feature) {
+                return feature.properties.style;
+            },
+            onEachFeature: function (feature, layer) {
+                if (feature.properties.popup) {
+                    layer.bindPopup(feature.properties.popup);
+                }
+            }
+        })
+
+        if (timeDimensionControl) {
+            map_dd0006a989594d36a6e96cb45d545116.removeControl(timeDimensionControl);
+            map_dd0006a989594d36a6e96cb45d545116.timeDimension  = null;
+            timestamped_geo_json_6872e495c2294c8895578f2009afccb0.remove(map_dd0006a989594d36a6e96cb45d545116);
+        }
+        L.Control.TimeDimensionCustom = L.Control.TimeDimension.extend({
+            _getDisplayDateFormat: function (date) {
+                var newdate = new moment(date);
+                return newdate.format("YYYY-MM-DD HH:mm:ss");
+            }
+        });
+        map_dd0006a989594d36a6e96cb45d545116.timeDimension = L.timeDimension(
+            {
+                period: "PT5S",
+            }
+        );
+        timeDimensionControl = new L.Control.TimeDimensionCustom(
+            { "autoPlay": false, "loopButton": false, "maxSpeed": 10, "minSpeed": 0.1, "playerOptions": { "loop": false, "startOver": true, "transitionTime": 200 }, "position": "bottomleft", "timeSliderDragUpdate": true }
+        );
+        map_dd0006a989594d36a6e96cb45d545116.addControl(timeDimensionControl);
+
+
+        timestamped_geo_json_6872e495c2294c8895578f2009afccb0 = L.timeDimension.layer.geoJson(
+            geoJsonLayer,
+            {
+                updateTimeDimension: true,
+                addlastPoint: true,
+                duration: "PT1M",
+            }
+        ).addTo(map_dd0006a989594d36a6e96cb45d545116);
+        */
     });
     {% endfor %}
     
