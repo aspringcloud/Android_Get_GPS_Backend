@@ -8,8 +8,8 @@
 *.pyc
 __pycache__/
 local_settings.py
-db.sqlite3
-db.sqlite3-journal
+#db.sqlite3
+#db.sqlite3-journal
 media
 
 # If your build process includes running collectstatic, then you probably don't need or want to include staticfiles/
@@ -151,7 +151,7 @@ dmypy.json
 .prof
 
 # private_yml
-YMLdir/
+#YMLdir/
 
 ### Python ###
 # Byte-compiled / optimized / DLL files
@@ -221,6 +221,6 @@ node_modules
 package-lock.json
 package.json
 docker_install.sh
-static
+#static
 mapDir/map2.html.zip
 test.js

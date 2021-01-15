@@ -61,7 +61,7 @@ class DTGDataModel(models.Model):
     dtgfile = models.ForeignKey(FileModel, on_delete=models.CASCADE,
                                 related_name='dtgdatas_to_dtgfiles', related_query_name="dtgfile_to_dtgdata", null=True)
     num = models.IntegerField()
-    datetimes = models.DateTimeField()
+    datetimes = models.DateTimeField(auto_now_add=True, null=True)
     daily_drive = models.IntegerField()
     stack_drive = models.IntegerField()
     speed = models.IntegerField()

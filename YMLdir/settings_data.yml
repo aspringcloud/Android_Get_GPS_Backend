@@ -1,0 +1,18 @@
+SETTING :
+    SECRET_KEY: '0++4qg-@+o3(km5ts_fy-+=)$t@y@e2+l3^5!wnh-&08ta!0o$'
+    DEBUG: True
+
+
+ELASTIC_SEARCH :
+    ES_HOST : 'http://192.168.200.11:9200'
+    ES_USERNAME : 'elastic'
+    ES_PASSWORD : 'spring#007'
+
+
+DB :
+    DB_ENGINE : 'django.db.backends.postgresql'
+    DB_NAME : 'postgres'
+    DB_USER : 'acrcwlee@acr-dtg-dvr-db'
+    DB_PASSWORD : 'aspc12345!'
+    DB_HOST : 'acr-dtg-dvr-db.postgres.database.azure.com'
+    DB_PORT : '5432'
