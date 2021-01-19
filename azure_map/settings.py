@@ -110,34 +110,34 @@ DATABASES = {
 # LOGGING
 # https://docs.djangoproject.com/en/3.1/topics/logging/
 
-LOGGING = {
-    'version': 1,
-    'disable_existing_loggers': True,
-    'formatters': {
-        'format1': {
-            'format': '[%(asctime)s] %(levelname)s [%(name)s:%(lineno)s] %(message)s',
-            'datefmt': '%d/%b/%Y %H:%M:%S',
-        },
-        'format2': {
-            'format': '[%(levelname)s] %(message)s',
-        },        
-    },
-    'handlers': {
-        'file': {
-            'level': 'DEBUG',
-            'class': 'logging.FileHandler',
-            'filename': join(BASE_DIR, 'Log', 'debug.log'),
-            'formatter': 'format1'
-        },
-    },
-    'loggers': {
-        'django': {
-            'handlers': ['file'],
-            'level': 'DEBUG',
-            'propagate': True,
-        },
-    },
-}
+# LOGGING = {
+#     'version': 1,
+#     'disable_existing_loggers': True,
+#     'formatters': {
+#         'format1': {
+#             'format': '[%(asctime)s] %(levelname)s [%(name)s:%(lineno)s] %(message)s',
+#             'datefmt': '%d/%b/%Y %H:%M:%S',
+#         },
+#         'format2': {
+#             'format': '[%(levelname)s] %(message)s',
+#         },        
+#     },
+#     'handlers': {
+#         'file': {
+#             'level': 'DEBUG',
+#             'class': 'logging.FileHandler',
+#             'filename': join(BASE_DIR, 'Log', 'debug.log'),
+#             'formatter': 'format1'
+#         },
+#     },
+#     'loggers': {
+#         'django': {
+#             'handlers': ['file'],
+#             'level': 'DEBUG',
+#             'propagate': True,
+#         },
+#     },
+# }
 
 # Password validation
 # https://docs.djangoproject.com/en/3.1/ref/settings/#auth-password-validators

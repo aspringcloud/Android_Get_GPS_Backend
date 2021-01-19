@@ -67,16 +67,15 @@
 </head>
 
 <body>
-
+    <h4>asdsd</h4>
     <div class="folium-map" id="map_dd0006a989594d36a6e96cb45d545116"></div>
 
 </body>
 <script>
-
     var map_dd0006a989594d36a6e96cb45d545116 = L.map(
         "map_dd0006a989594d36a6e96cb45d545116",
         {
-            center: [35.8139381, 126.4100331],
+            center: [35.9623436210677, 126.56067098490894],
             crs: L.CRS.EPSG3857,
             zoom: 20,
             zoomControl: true,
@@ -110,11 +109,11 @@
 
     var layer_control_f76b47c6a26a4cdfb7ee9a2f5a0210f5 = {
         base_layers: {
-            "openstreetmap": tile_layer_96480d6bad154054bc1e78c803c38ede,
+            "범례": tile_layer_96480d6bad154054bc1e78c803c38ede,
         },
         overlays: {
             {% for polyline in polylineList %}
-            "{{polyline.oplog.datetimes|date:"Y-M-d"}}": feature_groups[{{forloop.counter0}}],
+            "{{polyline.oplog.datetimes|date:"Y-m-d"}}": feature_groups[{{forloop.counter0}}],
             {% endfor %}
         },
     };

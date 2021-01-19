@@ -41,6 +41,15 @@ class OperationLogModel(models.Model):
     class Meta:
         ordering = ['-created_at']
 
+class Legend(models.Model):
+    detail = models.TextField(null=True)
+    datetimes = models.DateTimeField(default=timezone.now)
+    created_at = models.DateTimeField(default=timezone.now)
+    cardata = models.ForeignKey(CarDataModel, on_delete=models.CASCADE)
+
+    class Meta:
+        ordering = ['-created_at']
+
 
 # class DVRFileModel(ChunkedUpload):
 class FileModel(models.Model):
@@ -56,7 +65,8 @@ class FileModel(models.Model):
 
 
 class DTGDataModel(models.Model):
-    oplog = models.ForeignKey(OperationLogModel, on_delete=models.CASCADE,
+    Legend = models.ForeignKey(Legend, on_delete=models.PROTECT, null=True)
+    oplog = models.ForeignKey(OperationLogModel, on_delete=models.PROTECT,
                               related_name='dtgdatas_to_oplog', related_query_name="oplog_to_dtgdata", null=True)
     dtgfile = models.ForeignKey(FileModel, on_delete=models.CASCADE,
                                 related_name='dtgdatas_to_dtgfiles', related_query_name="dtgfile_to_dtgdata", null=True)

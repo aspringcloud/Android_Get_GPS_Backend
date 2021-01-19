@@ -28,14 +28,11 @@ def foliums(request):
     step = 1
     dtg_datasList = []
     locationList = []
-    oplogs = OperationLogModel.objects.filter(pk=1).order_by('datetimes').values(
-                'pk',
+    oplogs = Legend.objects.filter(pk=1).order_by('datetimes').values(
+                'id',
                 'detail',
                 'datetimes',
                 'created_at',
-                'distance',
-                'passenger',
-                'isoweeks',
             )
     lines = []
     stamp = 10
@@ -186,13 +183,13 @@ def foliumsEdit(request):
     KST = datetime.timedelta(hours=9)
     polylineList = []
     FeatureCollection = []
-    oplogs = OperationLogModel.objects.filter(id__in=[10]).order_by('datetimes').values(
-                'pk',
+    oplogs = Legend.objects.all().order_by('datetimes').values(
+                'id',
                 'datetimes',
             )
     stamp = 1
     for oplog in oplogs:
-        dtg_datas = getDtgData(DTGDataModel.objects.filter(oplog=oplog.get('pk')).exclude(longitude=0,oplog__in=[10,11]).order_by('datetimes'))
+        dtg_datas = getDtgData(DTGDataModel.objects.filter(Legend=oplog.get('id')).exclude(longitude=0).order_by('datetimes'))
         features = []
         location = []
         temp = pd.DataFrame(list(dtg_datas))
@@ -247,8 +244,8 @@ def gpsEdit(request):
     KST = datetime.timedelta(hours=9)
     polylineList = []
     FeatureCollection = []
-    oplogs = OperationLogModel.objects.filter(id__in=[10,11]).order_by('datetimes').values(
-                'pk',
+    oplogs = Legend.objects.filter(id__in=[10,11]).order_by('datetimes').values(
+                'id',
                 'datetimes',
             )
     print(oplogs)
@@ -305,14 +302,11 @@ def gpsEdit(request):
 def getData(request):
     KST = datetime.timedelta(hours=9)
     polylineList = []
-    oplogs = OperationLogModel.objects.all().order_by('datetimes').values(
-                'pk',
+    oplogs = Legend.objects.all().order_by('datetimes').values(
+                'id',
                 'detail',
                 'datetimes',
                 'created_at',
-                'distance',
-                'passenger',
-                'isoweeks',
             )
     features = []
     stamp = 10
