@@ -42,10 +42,11 @@ class OperationLogModel(models.Model):
         ordering = ['-created_at']
 
 class Legend(models.Model):
+    car = models.ForeignKey('CarDataModel',on_delete=models.CASCADE, null=True,related_name='car', related_query_name="car")
     detail = models.TextField(null=True)
     datetimes = models.DateTimeField(default=timezone.now)
     created_at = models.DateTimeField(default=timezone.now)
-    cardata = models.ForeignKey(CarDataModel, on_delete=models.CASCADE)
+    filesize = models.IntegerField(default=0)
 
     class Meta:
         ordering = ['-created_at']

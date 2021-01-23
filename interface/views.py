@@ -20,6 +20,8 @@ KST = timezone('Asia/Seoul')
 # 만들어진 맵에 붙힌 모듈 : 
 # snakeIn : https://github.com/IvanSanchez/Leaflet.Polyline.SnakeAnim
 # arrowhead : https://github.com/slutske22/leaflet-arrowheads
+
+# Test Code(분석 끝나면 지울 예정)
 def foliums(request):
     m = folium.Map(
         location=[36.50070878260868, 127.26875695652177],
@@ -157,33 +159,14 @@ def getDtgData(dtg_datas) :
             'avgDeviceStatus',
         )
 
-def getGpsDtaa(gps_datas) :
-    return gps_datas\
-            .annotate(
-            minute=TruncMinute('datetimes')
-        ).order_by('minute')\
-            .values(
-            'minute',
-        ).annotate(
-            cnt=Count('minute')
-        ).annotate(
-            avgLongitude=Avg('lat'),
-            avgLatitude=Avg('lon'),
-            avgSpeed=Avg('speed', output_field=IntegerField()),
-        ).values(
-            'minute',
-            'avgLongitude',
-            'avgLatitude',
-            'avgSpeed',
-        )
-
 # 만들어진 foliums map과 데이터 데이스에서 데이터를 가져와 build를 만들어 주는 부분
-def foliumsEdit(request):
-    # print(KST)
+def foliumsEdit(request, carnumber):
+    print(carnumber)
     KST = datetime.timedelta(hours=9)
     polylineList = []
     FeatureCollection = []
-    oplogs = Legend.objects.all().order_by('datetimes').values(
+    car = CarDataModel.objects.get(carnum=carnumber)
+    oplogs = Legend.objects.filter(car_id=car.id).order_by('datetimes').values(
                 'id',
                 'datetimes',
             )
@@ -230,133 +213,7 @@ def foliumsEdit(request):
         FeatureCollection.append(features)
     context = {
         'polylineList': polylineList,
-        # 'FeatureCollection' : {
-        #     "type":"FeatureCollection",
-        #     'features' : features,
-        # } 
         'FeatureCollection' : FeatureCollection,
     }
     return render(request, 'interface/foliumsEdit.html', context)
     # return JsonResponse(context)
-
-# 만들어진 foliums map과 데이터 데이스에서 데이터를 가져와 build를 만들어 주는 부분
-def gpsEdit(request):
-    KST = datetime.timedelta(hours=9)
-    polylineList = []
-    FeatureCollection = []
-    oplogs = Legend.objects.filter(id__in=[10,11]).order_by('datetimes').values(
-                'id',
-                'datetimes',
-            )
-    print(oplogs)
-    stamp = 1
-    for oplog in oplogs:
-        dtg_datas = getGpsDtaa(Gps.objects.filter(oplog_id=oplog.get('pk')).order_by('datetimes'))
-        features = []
-        location = []
-        temp = pd.DataFrame(list(dtg_datas))
-        location.append([float(dtg_datas[0].get('avgLatitude')), float(dtg_datas[0].get('avgLongitude'))] )
-        color = f"#{hex(random.randrange(1,16**6))[2:]}"
-        print(temp)
-        for i in range(stamp, len(temp.index)):
-            if (i%stamp != 0):
-                continue
-            location.append([float(dtg_datas[i].get('avgLatitude')), float(dtg_datas[i].get('avgLongitude'))])
-            features.append(
-                {
-                    "type":"Feature",
-                    "geometry":{
-                        "type":"LineString",
-                        "coordinates": [
-                            [dtg_datas[i-stamp].get('avgLongitude'), dtg_datas[i-stamp].get('avgLatitude')],
-                            [dtg_datas[i].get('avgLongitude'), dtg_datas[i].get('avgLatitude')],
-                        ],
-                    },
-                    "properties": {
-                        "times": [(dtg_datas[i-stamp].get('minute')+KST).strftime('%Y-%m-%dT%H:%M:%S'), (dtg_datas[i].get('minute')+KST).strftime('%Y-%m-%dT%H:%M:%S')],
-                        "style":{
-                            "weight":7,
-                            "strokeColor":"black",
-                            "strokeOpacity":1.0,
-                            "strokeWeight":4,
-                            "opacity":1,
-                            "colors":color,
-                        }
-                    }
-                }
-            )
-        polylineList.append({
-            'oplog' : oplog,
-            'poltline' : location,
-            'color' : color,
-            })
-        FeatureCollection.append(features)
-    context = {
-        'polylineList': polylineList,
-        'FeatureCollection' : FeatureCollection,
-    }
-    #return render(request, 'interface/foliumsEditGps.html', context)
-    return JsonResponse(context)
-
-# 또 테스트 하는 부분
-def getData(request):
-    KST = datetime.timedelta(hours=9)
-    polylineList = []
-    oplogs = Legend.objects.all().order_by('datetimes').values(
-                'id',
-                'detail',
-                'datetimes',
-                'created_at',
-            )
-    features = []
-    stamp = 10
-    for oplog in oplogs:
-        dtg_datas = DTGDataModel.objects.filter(oplog=oplog.get('pk')).exclude(longitude=0).order_by('datetimes').values('latitude','longitude','datetimes')
-        if dtg_datas.count() == 0:
-            continue
-        location = []
-        
-        temp = pd.DataFrame(list(dtg_datas))
-        location.append([dtg_datas[0].get('latitude'), dtg_datas[0].get('longitude')] )
-        color = f"#{hex(random.randrange(1,16**6))[2:]}"
-        for i in range(stamp, len(temp.index)):
-            if (i%stamp != 0):
-                continue
-            location.append([dtg_datas[i].get('latitude'), dtg_datas[i].get('longitude')])
-            features.append(
-                {
-                    "type":"Feature",
-                    "geometry":{
-                        "type":"LineString",
-                        "coordinates": [
-                            [dtg_datas[i-stamp].get('longitude'), dtg_datas[i-stamp].get('latitude')],
-                            [dtg_datas[i].get('longitude'), dtg_datas[i].get('latitude')],
-                        ],
-                    },
-                    "properties": {
-                        "times": [(dtg_datas[i-stamp].get('datetimes')+KST).strftime('%Y-%m-%dT%H:%M:%S'), (dtg_datas[i].get('datetimes')+KST).strftime('%Y-%m-%dT%H:%M:%S')],
-                        "style":{
-                            "weight":7,
-                            "strokeColor":"black",
-                            "strokeOpacity":1.0,
-                            "strokeWeight":4,
-                            "opacity":1,
-                            "colors":color,
-                        }
-                    }
-                }
-            )
-        polylineList.append({
-            'oplog' : oplog,
-            'poltline' : location,
-            'color' : color
-            })
-    context = {
-        'polylineList': polylineList,
-        'FeatureCollection' : {
-            "type":"FeatureCollection",
-            'features' : features,
-        } 
-    }
-    # return render(request, 'interface/foliumsEdit.html', context)
-    return JsonResponse(context)
