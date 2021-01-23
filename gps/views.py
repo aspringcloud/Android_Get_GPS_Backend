@@ -51,14 +51,16 @@ class ActivityGps(View):
             return JsonResponse({"error" : e}, status = 400)
 
 class GetGpsInfo(View):
-    def get(self, request, pk):
+    def post(self, request):
         try:
-            legend = Legend.objects.get(car=pk)
-            data = [{
-                "id"             : legend.id ,
-                "car"            : legend.car ,
-                "filesize"       : legend.filesize ,
-            }]
-            return JsonResponse(data, safe=False,status=200)
+            data = json.loads(request.body)
+            now = datetime.datetime.now()
+            car = CarDataModel.objects.get(carnum=int(data['carnumber']))
+            legend = Legend.objects.get(datetimes__startswith=datetime.date(now.year,now.month,now.day),car_id=car.id)
+
+            return JsonResponse({"filesize" : legend.filesize},status=200)
+
         except Legend.DoesNotExist:
-            return JsonResponse({"error" : "Does not exist"}, status=400)
+            return JsonResponse({"filesize" : 0}, status=200)
+        except Exception as e:
+            return JsonResponse({"Error" : "Error 400"}, status=400)
