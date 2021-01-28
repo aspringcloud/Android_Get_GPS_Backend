@@ -3,7 +3,8 @@ FROM python:3.8
 ENV PYTHONUNBUFFERED 1
 RUN apt-get update \
     && apt-get install -y vim \
-    && apt-get install -y --no-install-recommends
+    && apt-get install -y --no-install-recommends \
+    && apt-get install -y sqlite3
 RUN mkdir /code
 WORKDIR /code 
 ADD . /code/
