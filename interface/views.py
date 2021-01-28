@@ -161,7 +161,6 @@ def getDtgData(dtg_datas) :
 
 # 만들어진 foliums map과 데이터 데이스에서 데이터를 가져와 build를 만들어 주는 부분
 def foliumsEdit(request, carnumber):
-    print(carnumber)
     KST = datetime.timedelta(hours=9)
     polylineList = []
     FeatureCollection = []
@@ -215,5 +214,5 @@ def foliumsEdit(request, carnumber):
         'polylineList': polylineList,
         'FeatureCollection' : FeatureCollection,
     }
-    # return render(request, 'interface/foliumsEdit.html', context)
-    return JsonResponse(context)
+    return render(request, 'interface/foliumsEdit.html', context)
+    # return JsonResponse(context)
