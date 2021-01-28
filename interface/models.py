@@ -1,8 +1,8 @@
-import datetime
-import os
-
 from django.db import models
 from django.conf import settings
+from django.utils import timezone
+import datetime
+import os
 
 
 def get_date_path(filetype, car_num, data_date):
@@ -31,8 +31,8 @@ class CarDataModel(models.Model):
 
 class OperationLogModel(models.Model):
     detail = models.TextField(null=True)
-    datetimes = models.DateTimeField(default=datetime.datetime.now())
-    created_at = models.DateTimeField(default=datetime.datetime.now())
+    datetimes = models.DateTimeField(default=timezone.now)
+    created_at = models.DateTimeField(default=timezone.now)
     distance = models.IntegerField(default=0)
     passenger = models.IntegerField(default=0)
     isoweeks = models.IntegerField(default=1)
@@ -45,8 +45,8 @@ class OperationLogModel(models.Model):
 class Legend(models.Model):
     car = models.ForeignKey('CarDataModel',on_delete=models.CASCADE, null=True,related_name='car', related_query_name="car")
     detail = models.TextField(null=True)
-    datetimes = models.DateTimeField(default=datetime.datetime.now())
-    created_at = models.DateTimeField(default=datetime.datetime.now())
+    datetimes = models.DateTimeField(default=timezone.now)
+    created_at = models.DateTimeField(default=timezone.now)
     filesize = models.IntegerField(default=0)
 
     class Meta:
@@ -58,7 +58,7 @@ class FileModel(models.Model):
     oplog = models.ForeignKey(OperationLogModel, on_delete=models.CASCADE,
                               related_name='files_to_oplog', related_query_name="oplog_to_file", null=True)
     camera_pos = models.CharField(max_length=4)
-    created_at = models.DateTimeField(default=datetime.datetime.now(), null=True)
+    created_at = models.DateTimeField(default=timezone.now, null=True)
     files = models.FileField(upload_to=upload_path, null=True)
     filename = models.CharField(max_length=50, null=True)
     filetype = models.CharField(max_length=10, null=True)

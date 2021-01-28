@@ -1,6 +1,6 @@
 import json
-import datetime
 
+from django.utils import timezone
 from django.shortcuts import render
 from django.views import View
 from django.http import JsonResponse
@@ -12,9 +12,11 @@ from accounts.models import User
 class ActivityGps(View):
     def post(self, request):
         try:
+            KST = datetime.timedelta(hours=9)
             data = json.loads(request.body)
             print(data)
-            now = datetime.datetime.now()
+            now = timezone.now()
+            
             try:
                 car = CarDataModel.objects.get(carnum=int(data["car"]))
                 legend = Legend.objects.get(datetimes__startswith=datetime.date(now.year,now.month,now.day),car_id=car.id)
