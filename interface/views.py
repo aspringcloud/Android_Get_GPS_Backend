@@ -215,5 +215,5 @@ def foliumsEdit(request, carnumber):
         'polylineList': polylineList,
         'FeatureCollection' : FeatureCollection,
     }
-    return render(request, 'interface/foliumsEdit.html', context)
-    # return JsonResponse(context)
+    # return render(request, 'interface/foliumsEdit.html', context)
+    return JsonResponse(context)
