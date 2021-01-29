@@ -46,7 +46,7 @@
     <meta name="viewport" content="width=device-width,
                 initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <style>
-        #map_dd0006a989594d36a6e96cb45d545116 {
+        #map__folium {
             position: relative;
             width: 100.0%;
             height: 100.0%;
@@ -67,16 +67,15 @@
 </head>
 
 <body>
-
-    <div class="folium-map" id="map_dd0006a989594d36a6e96cb45d545116"></div>
+    <div class="folium-map" id="map__folium"></div>
 
 </body>
 <script>
-
-    var map_dd0006a989594d36a6e96cb45d545116 = L.map(
-        "map_dd0006a989594d36a6e96cb45d545116",
+    // map 초기 세팅
+    var map__folium = L.map(
+        "map__folium",
         {
-            center: [36.50070878260868, 127.26875695652177],
+            center: [35.9623436210677, 126.56067098490894],
             crs: L.CRS.EPSG3857,
             zoom: 20,
             zoomControl: true,
@@ -85,44 +84,44 @@
         }
     );
 
-
-    var tile_layer_96480d6bad154054bc1e78c803c38ede = L.tileLayer(
+    // title Layer
+    var tile_layer = L.tileLayer(
         "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
-        { "attribution": "Data by \u0026copy; \u003ca href=\"http://openstreetmap.org\"\u003eOpenStreetMap\u003c/a\u003e, under \u003ca href=\"http://www.openstreetmap.org/copyright\"\u003eODbL\u003c/a\u003e.", "detectRetina": false, "maxNativeZoom": 18, "maxZoom": 18, "minZoom": 0, "noWrap": false, "opacity": 1, "subdomains": "abc", "tms": false }
-    ).addTo(map_dd0006a989594d36a6e96cb45d545116);
+        { "attribution": "Data by \u0026copy; \u003ca href=\"http://openstreetmap.org\"\u003eOpenStreetMap\u003c/a\u003e, under \u003ca href=\"http://www.openstreetmap.org/copyright\"\u003eODbL\u003c/a\u003e.", "maxZoom": 18, "minZoom": 0,}
+    ).addTo(map__folium);
 
     var feature_groups = []
 
     var poly_lines = []
     var route = []
     var colors = []
+
     {% for polyline in polylineList %}
     colors[{{forloop.counter0}}] = "{{polyline.color}}"
     feature_groups[{{forloop.counter0}}] = L.featureGroup(
         {}
-    ).addTo(map_dd0006a989594d36a6e96cb45d545116);
+    ).addTo(map__folium);
     route[{{forloop.counter0}}] = {{polyline.poltline}}
     poly_lines[{{forloop.counter0}}] = getPoltLine(route[{{forloop.counter0}}], colors[{{forloop.counter0}}]).addTo(feature_groups[{{forloop.counter0}}]);
-    console.log(poly_lines[{{forloop.counter0}}].snakeIn())
     poly_lines[{{forloop.counter0}}].snakeIn()
     {% endfor %}
 
 
-    var layer_control_f76b47c6a26a4cdfb7ee9a2f5a0210f5 = {
+    var layer_control = {
         base_layers: {
-            "openstreetmap": tile_layer_96480d6bad154054bc1e78c803c38ede,
+            "범례": tile_layer,
         },
         overlays: {
             {% for polyline in polylineList %}
-            "{{polyline.oplog.datetimes|date:"Y-M-d"}}": feature_groups[{{forloop.counter0}}],
+            "{{polyline.oplog.datetimes|date:"Y-m-d"}}": feature_groups[{{forloop.counter0}}],
             {% endfor %}
         },
     };
     L.control.layers(
-        layer_control_f76b47c6a26a4cdfb7ee9a2f5a0210f5.base_layers,
-        layer_control_f76b47c6a26a4cdfb7ee9a2f5a0210f5.overlays,
-        { "autoZIndex": true, "collapsed": false, "position": "topright" }
-    ).addTo(map_dd0006a989594d36a6e96cb45d545116);
+        layer_control.base_layers,
+        layer_control.overlays,
+        { "autoZIndex": false, "collapsed": false, "position": "topright" }
+    ).addTo(map__folium);
 
     L.Control.TimeDimensionCustom = L.Control.TimeDimension.extend({
         _getDisplayDateFormat: function (date) {
@@ -138,11 +137,11 @@
             
         }
     );
-    map_dd0006a989594d36a6e96cb45d545116.timeDimension = timeDimension;
+    map__folium.timeDimension = timeDimension;
     var timeDimensionControl = new L.Control.TimeDimensionCustom(
         { "autoPlay": false, "loopButton": false, "maxSpeed": 10, "minSpeed": 0.1, "playerOptions": { "loop": false, "startOver": true, "transitionTime": 200 }, "position": "bottomleft", "timeSliderDragUpdate": true }
     );
-    map_dd0006a989594d36a6e96cb45d545116.addControl(this.timeDimensionControl); 
+    map__folium.addControl(this.timeDimensionControl); 
 
 
 
@@ -199,7 +198,7 @@
         }
     })
 
-    var timestamped_geo_json_6872e495c2294c8895578f2009afccb0 = L.timeDimension.layer.geoJson(
+    var timestamped_geo_json = L.timeDimension.layer.geoJson(
         geoJsonLayer,
         {
             updateTimeDimension: true,
@@ -207,87 +206,19 @@
             duration: "PT1M",
             // updateTimeDimensionMode: 'replace',
         }
-    ).addTo(map_dd0006a989594d36a6e96cb45d545116);
+    ).addTo(map__folium);
 
-    {% comment %} var timestamped_geo_json_6872e495c2294c8895578f2009afccb0 = null;
+    {% comment %} var timestamped_geo_json = null;
     var timeDimensionControl = null;
-    var timestamped_geo_json_6872e495c2294c8895578f2009afccb0; {% endcomment %}
+    var timestamped_geo_json; {% endcomment %}
     {% for polyline in polylineList %}
     feature_groups[{{forloop.counter0}}].on("add",function(){
         feature_groups[{{forloop.counter0}}].removeLayer(poly_lines[{{forloop.counter0}}]);
         poly_lines[{{forloop.counter0}}] = getPoltLine(route[{{forloop.counter0}}], colors[{{forloop.counter0}}]).addTo(feature_groups[{{forloop.counter0}}]);
-        map_dd0006a989594d36a6e96cb45d545116.fitBounds(feature_groups[{{forloop.counter0}}].getBounds());
+        map__folium.fitBounds(feature_groups[{{forloop.counter0}}].getBounds());
         poly_lines[{{forloop.counter0}}].snakeIn()
         
         timeDimension.setCurrentTime(featureCollection[{{forloop.counter0}}][0].properties.times[0])
-        /*
-        var geoJsonLayer = L.geoJson(
-            {
-                "type":"FeatureCollection",
-                'features' : featureCollection[{{forloop.counter0}}]//.concat(featureCollection[1])
-            }, {
-            pointToLayer: function (feature, latLng) {
-                if (feature.properties.icon == 'marker') {
-                    if (feature.properties.iconstyle) {
-                        return new L.Marker(latLng, {
-                            icon: L.icon(feature.properties.iconstyle)
-                        });
-                    }
-                    //else
-                    return new L.Marker(latLng);
-                }
-                if (feature.properties.icon == 'circle') {
-                    if (feature.properties.iconstyle) {
-                        return new L.circleMarker(latLng, feature.properties.iconstyle)
-                    };
-                    //else
-                    return new L.circleMarker(latLng);
-                }
-                //else
-
-                return new L.Marker(latLng);
-            },
-            style: function (feature) {
-                return feature.properties.style;
-            },
-            onEachFeature: function (feature, layer) {
-                if (feature.properties.popup) {
-                    layer.bindPopup(feature.properties.popup);
-                }
-            }
-        })
-
-        if (timeDimensionControl) {
-            map_dd0006a989594d36a6e96cb45d545116.removeControl(timeDimensionControl);
-            map_dd0006a989594d36a6e96cb45d545116.timeDimension  = null;
-            timestamped_geo_json_6872e495c2294c8895578f2009afccb0.remove(map_dd0006a989594d36a6e96cb45d545116);
-        }
-        L.Control.TimeDimensionCustom = L.Control.TimeDimension.extend({
-            _getDisplayDateFormat: function (date) {
-                var newdate = new moment(date);
-                return newdate.format("YYYY-MM-DD HH:mm:ss");
-            }
-        });
-        map_dd0006a989594d36a6e96cb45d545116.timeDimension = L.timeDimension(
-            {
-                period: "PT5S",
-            }
-        );
-        timeDimensionControl = new L.Control.TimeDimensionCustom(
-            { "autoPlay": false, "loopButton": false, "maxSpeed": 10, "minSpeed": 0.1, "playerOptions": { "loop": false, "startOver": true, "transitionTime": 200 }, "position": "bottomleft", "timeSliderDragUpdate": true }
-        );
-        map_dd0006a989594d36a6e96cb45d545116.addControl(timeDimensionControl);
-
-
-        timestamped_geo_json_6872e495c2294c8895578f2009afccb0 = L.timeDimension.layer.geoJson(
-            geoJsonLayer,
-            {
-                updateTimeDimension: true,
-                addlastPoint: true,
-                duration: "PT1M",
-            }
-        ).addTo(map_dd0006a989594d36a6e96cb45d545116);
-        */
     });
     {% endfor %}
     

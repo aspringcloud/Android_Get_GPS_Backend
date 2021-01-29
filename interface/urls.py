@@ -5,4 +5,5 @@ app_name = 'interface'
 urlpatterns = [
     path('folium/', views.foliums, name='folium'),
     path('mycar/<int:carnumber>', views.foliumsEdit, name='foliumsEdit'),
+    path('test/mycar/<int:carnumber>', views.foliumsEditUpdate, name='foliumsEditGps'),
 ]
